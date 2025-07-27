@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { FaArrowLeft } from 'react-icons/fa';
-import { ArrowLeft } from 'lucide-react'; // Assuming you have react-icons installed
+import { FaArrowLeft } from 'react-icons/fa'; // Assuming you have react-icons installed
 
 const MyAccount = () => {
   const [profile, setProfile] = useState({ fullName: '', email: '' });
@@ -18,6 +17,7 @@ const MyAccount = () => {
       // If the token is httpOnly cookie, client-side JS cannot read it from localStorage.
       // In that case, the server would implicitly handle the cookie for authentication.
       // For this frontend code, assuming the token might still be in localStorage for client-side use (if not httpOnly).
+      const token = localStorage.getItem('token'); 
 
       // If token is httpOnly, you might not need to pass it explicitly in headers.
       // The browser will automatically send the cookie.
@@ -72,6 +72,7 @@ const MyAccount = () => {
       return;
     }
 
+    const token = localStorage.getItem('token');
     const config = {
       headers: {
         // Same note as above: Authorization header needed if your backend requires it
@@ -96,18 +97,17 @@ const MyAccount = () => {
   };
 
   return (
-    <div className="min-h-screen bg-blue-100 p-4 sm:p-6 relative">
+    <div className="min-h-screen bg-gray-100 p-4 sm:p-6 relative">
       {/* Back to Home Button */}
       <a
         href="/" // Assuming '/' is your home route. Use React Router's <Link> if you have it.
-        className="absolute top-4 left-4 sm:top-6 sm:left-6 flex items-center text-blue-700 hover:text-blue-900 transition duration-200"
+        className="absolute top-4 left-4 sm:top-6 sm:left-6 flex items-center text-blue-600 hover:text-blue-800 transition duration-200"
       >
-        <ArrowLeft size={20} /> Back to Home
+        <FaArrowLeft className="mr-2" /> Back to Home
       </a>
-      
 
       <div className="max-w-xl mx-auto mt-12 bg-white rounded-lg shadow-xl overflow-hidden">
-        <div className="bg-gradient-to-r from-blue-800 to-blue-700 p-6 text-white text-center">
+        <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-6 text-white text-center">
           <h1 className="text-3xl font-extrabold tracking-tight">My Account</h1>
           <p className="mt-1 text-blue-200">Manage your profile and security settings.</p>
         </div>

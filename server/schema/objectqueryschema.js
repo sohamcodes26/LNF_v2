@@ -1,5 +1,26 @@
 import mongoose from 'mongoose';
 
+// --- Shared AI Feature Fields ---
+const aiFeatureFields = {
+    canonicalLabel: {
+        type: String,
+        trim: true,
+        index: true // Add an index for faster searching
+    },
+    text_embedding: {
+        type: [Number] // Array of numbers
+    },
+    shape_features: {
+        type: [Number] // Array of numbers
+    },
+    color_features: {
+        type: [Number] // Array of numbers
+    },
+    texture_features: {
+        type: [Number] // Array of numbers
+    }
+};
+
 const lostItemSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -29,6 +50,12 @@ const lostItemSchema = new mongoose.Schema({
         type: Date,
         required: true
     },
+    status: {
+        type: String,
+        enum: ['not_resolved', 'resolved'],
+        default: 'not_resolved'
+    },
+    ...aiFeatureFields // Add all the AI feature fields here
 },
 {
     timestamps: true,
@@ -64,6 +91,12 @@ const foundItemSchema = new mongoose.Schema({
         type: Date,
         required: true
     },
+    status: {
+        type: String,
+        enum: ['not_resolved', 'resolved'],
+        default: 'not_resolved'
+    },
+    ...aiFeatureFields // Add all the AI feature fields here
 },
 {
     timestamps: true,

@@ -9,6 +9,8 @@ import {
   FaUserCircle,
 } from "react-icons/fa"; // Removed FaPhone
 
+import { CheckCircle } from "lucide-react";
+
 const FoundItems = () => {
   const [foundItems, setFoundItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -104,7 +106,7 @@ const FoundItems = () => {
                   {item.objectImage ? (
                     <img
                       src={item.objectImage}
-                      alt={item.itemName || "Found Item"}
+                      alt={item.objectName || "Found Item"}
                       className="w-full h-48 object-cover"
                       onError={(e) => {
                         e.target.onerror = null;
@@ -125,7 +127,16 @@ const FoundItems = () => {
                     <p className="text-gray-600 text-sm line-clamp-2">
                       {item.objectDescription || "No description provided."}
                     </p>
+
                     <div className="text-gray-700 text-sm space-y-1">
+                      <p className="flex items-center gap-2">
+                        <CheckCircle size={16} className="text-green-500" />
+                        <span>
+                          <strong>Status: </strong>
+
+                          {item.status}
+                        </span>
+                      </p>
                       <p className="flex items-center">
                         <FaMapMarkerAlt className="mr-2 text-blue-500" />{" "}
                         <strong>Location:</strong> {item.locationFound || "N/A"}
@@ -133,12 +144,10 @@ const FoundItems = () => {
                       <p className="flex items-center">
                         <FaCalendarAlt className="mr-2 text-purple-500" />{" "}
                         <strong>Date:</strong>{" "}
-                        {item.date
+                        {item.dateFound
                           ? new Date(item.dateFound).toLocaleDateString()
                           : "N/A"}
                       </p>
-                      
-                    
                     </div>
                   </div>
                 </div>

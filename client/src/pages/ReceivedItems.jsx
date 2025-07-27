@@ -9,6 +9,7 @@ import {
   FaUserCheck,
   FaHandshake,
 } from "react-icons/fa";
+import { CheckCircle } from "lucide-react";
 
 const ReceivedItems = () => {
   const [receivedItems, setReceivedItems] = useState([]);
@@ -29,7 +30,7 @@ const ReceivedItems = () => {
           "http://localhost:8000/apis/lost-and-found/my-items/my-lost-items",
           config
         );
-       
+
         setReceivedItems(response.data.lostItems);
       } catch (err) {
         console.error("Error fetching received items:", err);
@@ -88,9 +89,7 @@ const ReceivedItems = () => {
             <div className="text-center text-gray-600 py-8">
               <FaBoxOpen className="mx-auto text-6xl mb-4 text-gray-400" />
               <p className="text-xl font-semibold">No items lost yet.</p>
-              <p className="mt-2">
-                Status of lost itmes will be visible here.
-              </p>
+              <p className="mt-2">Status of lost itmes will be visible here.</p>
             </div>
           )}
 
@@ -126,6 +125,14 @@ const ReceivedItems = () => {
                       {item.objectDescription || "No description provided."}
                     </p>
                     <div className="text-gray-700 text-sm space-y-1">
+                      <p className="flex items-center gap-2">
+                        <CheckCircle size={16} className="text-green-500" />
+                        <span>
+                          <strong>Status: </strong>
+
+                          {item.status}
+                        </span>
+                      </p>
                       <p className="flex items-center">
                         <FaMapMarkerAlt className="mr-2 text-blue-500" />{" "}
                         <strong>Location:</strong> {item.locationLost || "N/A"}
@@ -137,7 +144,6 @@ const ReceivedItems = () => {
                           ? new Date(item.dateLost).toLocaleDateString()
                           : "N/A"}
                       </p>
-                      
                     </div>
                   </div>
                 </div>

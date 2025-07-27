@@ -1,17 +1,16 @@
 import { Routes, Route } from 'react-router-dom';
 
 // Page Imports
-import LandingPage from './pages/Landing';
-import PostFoundPage from './pages/PostFound';
-import FindLostItemPage from './pages/FindLostItem';
-import MyAccountPage from '../../backup/MyAccount';
-import FoundItemsPage from './pages/FoundItems';
-import ReceivedItemsPage from './pages/ReceivedItems';
-import HelpPage from './pages/Help';
+import LandingPage from '../client/src/pages/Landing';
+import PostFoundPage from '../client/src/pages/PostFound';
+import FindLostItemPage from '../client/src/pages/FindLostItem';
+import MyAccountPage from '../client/src/pages/MyAccount';
+import FoundItemsPage from '../client/src/pages/FoundItems';
+import ReceivedItemsPage from '../client/src/pages/ReceivedItems';
+import HelpPage from '../client/src/pages/Help';
 
 // Auth Imports
-import ProtectedRoute from './components/auth/ProtectedRoute';
-import ResultsPage from './pages/Results';
+import ProtectedRoute from '../client/src/components/auth/ProtectedRoute';
 
 function App() {
   return (
@@ -27,7 +26,6 @@ function App() {
         <Route path="/my-found-items" element={<FoundItemsPage />} />
         <Route path="/my-received-items" element={<ReceivedItemsPage />} />
         <Route path="/help" element={<HelpPage />} />
-        <Route path="/results" element={<ResultsPage />} />
       </Route>
     </Routes>
   );

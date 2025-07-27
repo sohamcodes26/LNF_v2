@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { User, Archive, CheckSquare, HelpCircle, LogOut, X, Sparkles } from 'lucide-react';
+import { User, Archive, CheckSquare, HelpCircle, LogOut, X } from 'lucide-react';
 
 // Added 'side' prop with a default value of 'left' for flexibility
 const Sidebar = ({ isOpen, onClose, side = 'left' }) => {
@@ -40,7 +40,7 @@ const Sidebar = ({ isOpen, onClose, side = 'left' }) => {
       >
         <div className="p-6">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-xl font-bold text-blue-800">My Profile</h2>
+            <h2 className="text-xl font-bold text-gray-800">My Profile</h2>
             <button onClick={onClose} className="text-gray-500 hover:text-gray-800">
               <X size={24} />
             </button>
@@ -59,15 +59,11 @@ const Sidebar = ({ isOpen, onClose, side = 'left' }) => {
               <CheckSquare size={20} />
               <span>My Lost Items</span>
             </NavLink>
-            <NavLink to="/results" className={({isActive}) => `${linkClass} ${isActive ? activeLinkClass : ''}`} onClick={onClose}>
-              <Sparkles size={20} /> 
-              <span>Results</span>
-            </NavLink>
             <NavLink to="/help" className={({isActive}) => `${linkClass} ${isActive ? activeLinkClass : ''}`} onClick={onClose}>
               <HelpCircle size={20} />
               <span>Help</span>
             </NavLink>
-            <button onClick={handleLogout} className={`${linkClass} mt-70 text-red-600 hover:bg-red-100`}>
+            <button onClick={handleLogout} className={`${linkClass} mt-4`}>
               <LogOut size={20} />
               <span>Logout</span>
             </button>
