@@ -98,7 +98,7 @@ export const getChatHistory = async (req, res) => {
 
         const messages = await ChatMessage.find({ chatRoom: roomId })
             .sort({ createdAt: 1 })
-            .populate('sender', 'email name'); // Assuming 'name' field exists
+            .populate('sender'); // Assuming 'name' field exists
 
         ChatMessage.updateMany(
             { chatRoom: roomId, receiver: userId, read: false },

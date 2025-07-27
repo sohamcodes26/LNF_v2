@@ -64,19 +64,8 @@ const ChatModal = ({ currentUserId, chatPartner, onClose }) => {
     // 4. Listen for New Messages via Socket.IO
     useEffect(() => {
         const handleNewMessage = (newMessage) => {
-            // New message from socket.io might have sender populated differently
-            // Ensure consistency by checking if sender is an object and accessing its _id
-            const senderIdFromSocket = newMessage.sender?._id || newMessage.sender;
-
             if (newMessage.chatRoom === roomId) {
-                setMessages((prevMessages) => {
-                    // Prevent duplicate messages if the message is already in the list
-                    // This can happen if the backend sends it via socket AND the client's own POST receives it.
-                    const isDuplicate = prevMessages.some(
-                        (msg) => msg._id === newMessage._id
-                    );
-                    return isDuplicate ? prevMessages : [...prevMessages, newMessage];
-                });
+                 setMessages((prevMessages) => [...prevMessages, newMessage]);
             }
         };
 
@@ -96,9 +85,6 @@ const ChatModal = ({ currentUserId, chatPartner, onClose }) => {
     const handleSendMessage = async () => {
         if (inputMessage.trim() && roomId) {
             try {
-                // When sending, the message will be added to the state via the socket.io listener,
-                // so we don't need to manually add it here immediately.
-                // The socket.io handler should deal with adding it and ensuring no duplicates.
                 await axios.post(
                     'http://localhost:8000/apis/lost-and-found/chat/message',
                     { roomId, message: inputMessage.trim() },
@@ -134,6 +120,11 @@ const ChatModal = ({ currentUserId, chatPartner, onClose }) => {
                 </header>
 
                 {/* Message Display Area */}
+                {/* To enable custom scrollbars, you need a Tailwind plugin.
+                    1. npm install -D tailwind-scrollbar
+                    2. In your tailwind.config.js, add:
+                       plugins: [require('tailwind-scrollbar')],
+                */}
                 <div className="flex-grow overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                     {isLoading ? (
                         <div className="flex items-center justify-center h-full text-gray-500">
@@ -141,26 +132,26 @@ const ChatModal = ({ currentUserId, chatPartner, onClose }) => {
                             <span>Loading Chat...</span>
                         </div>
                     ) : error ? (
-                            <div className="flex items-center justify-center h-full text-red-500">
-                                <span>{error}</span>
-                            </div>
+                         <div className="flex items-center justify-center h-full text-red-500">
+                            <span>{error}</span>
+                        </div>
                     ) : messages.length === 0 ? (
                         <p className="text-gray-400 text-center py-4">No messages yet. Say hello!</p>
                     ) : (
                         messages.map((msg) => (
                             <div
                                 key={msg._id}
-                                className={`flex items-end gap-2 ${msg.sender._id === currentUserId ? 'justify-end' : 'justify-start'}`}
+                                className={`flex items-end gap-2 ${msg.sender === currentUserId ? 'justify-end' : 'justify-start'}`}
                             >
                                 <div
                                     className={`max-w-[70%] p-3 rounded-2xl ${
-                                        msg.sender._id === currentUserId
+                                        msg.sender === currentUserId
                                             ? 'bg-indigo-600 text-white rounded-br-lg'
                                             : 'bg-gray-200 text-gray-800 rounded-bl-lg'
                                     }`}
                                 >
                                     <p className="text-sm">{msg.message}</p>
-                                    <p className={`text-xs text-right mt-1 ${msg.sender._id === currentUserId ? 'text-indigo-200' : 'text-gray-500'}`}>
+                                    <p className={`text-xs text-right mt-1 ${msg.sender === currentUserId ? 'text-indigo-200' : 'text-gray-500'}`}>
                                         {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                     </p>
                                 </div>

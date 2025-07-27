@@ -26,11 +26,6 @@ const PostFoundPage = () => {
       return;
     }
 
-    const token = localStorage.getItem('token');
-    if (!token) {
-      alert('You must be logged in to post a found item.');
-      return;
-    }
 
     const formData = new FormData();
     formData.append('objectName', itemTitle);
@@ -41,9 +36,7 @@ const PostFoundPage = () => {
 
     try {
       const response = await axios.post('http://localhost:8000/apis/lost-and-found/object-query/report-found', formData, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        
       });
 
       setItemTitle('');

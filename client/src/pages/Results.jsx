@@ -11,12 +11,16 @@ import {
     AlertTriangle, 
     ShieldCheck, 
     XCircle,
-    KeyRound,
+    KeyRound, // Replaced QrCode with KeyRound
     Info
 } from 'lucide-react';
-import ChatModal from './ChatModal';
+
 import axios from 'axios';
-import { useAuth } from '../context/AuthContext'; // Corrected Path
+import ChatModal from './ChatModal';
+
+
+// This should come from your user authentication context/store
+let CURRENT_USER_ID = 'your_logged_in_user_id'; // Replace with the actual logged-in user's ID
 
 // --- Reusable Modal Components ---
 
@@ -69,6 +73,7 @@ const InputModal = ({ title, message, onConfirm, onCancel }) => {
     );
 };
 
+// --- New Modal to display the OTP Code ---
 const TransferCodeModal = ({ code, onClose, title }) => (
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 transition-opacity duration-300" onClick={onClose}>
         <div className="bg-white rounded-2xl p-8 text-center relative" onClick={(e) => e.stopPropagation()}>
@@ -85,11 +90,6 @@ const TransferCodeModal = ({ code, onClose, title }) => (
 
 
 const ResultsPage = () => {
-  const { authState } = useAuth(); // Get user info from AuthContext
-  const currentUserId = authState.user?._id; // Get the actual logged-in user's ID
-  // Assuming your auth context provides a loading state. If not, this needs to be added to your AuthContext.
-  const isAuthLoading = authState.isLoading; 
-
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -97,44 +97,33 @@ const ResultsPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [chatPartner, setChatPartner] = useState(null);
   const [actionLoading, setActionLoading] = useState({});
-  const [transferCodeInfo, setTransferCodeInfo] = useState(null);
+  const [transferCodeInfo, setTransferCodeInfo] = useState(null); // Replaced qrCodeData
   const [alertInfo, setAlertInfo] = useState(null);
   const [verifyModalInfo, setVerifyModalInfo] = useState(null);
 
   // --- Data Fetching ---
+  const fetchMatches = async () => {
+    try {
+      setLoading(true);
+      // Using localhost as requested
+      const response = await axios.get('http://localhost:8000/apis/lost-and-found/results/', {
+        withCredentials: true,
+      });
+
+      CURRENT_USER_ID = response.data.userId;
+      setMatches(response.data.matches || []);
+
+    } catch (err) {
+      setError('Failed to fetch matches. Please try again later.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchMatches = async () => {
-      // First, wait for the authentication check to complete
-      if (isAuthLoading) {
-        setLoading(true); // Keep the page in a loading state
-        return;
-      }
-
-      // Once auth is checked, see if we have a user
-      if (!currentUserId) {
-        setLoading(false);
-        setError("Please log in to see your matches.");
-        return;
-      }
-
-      // If we have a user, proceed to fetch data
-      try {
-        setLoading(true);
-        const response = await axios.get('http://localhost:8000/apis/lost-and-found/results/', {
-          withCredentials: true,
-        });
-        setMatches(response.data || []);
-        setError(null); // Clear any previous errors
-      } catch (err) {
-        setError('Failed to fetch matches. Please try again later.');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchMatches();
-  }, [currentUserId, isAuthLoading]); // Re-run effect if auth loading state or user ID changes
+  }, []);
 
   // --- State Update Helpers ---
   const updateMatchInState = (updatedMatch) => {
@@ -157,7 +146,7 @@ const ResultsPage = () => {
     );
   }
 
-  // --- API Action Handlers (Updated for OTP) ---
+  // --- API Action Handlers (Updated for OTP) ---  
   const handleMatchAction = async (action, resultId, data = {}) => {
     setActionLoading(prev => ({ ...prev, [resultId]: true }));
     try {
@@ -172,13 +161,13 @@ const ResultsPage = () => {
           response = await axios.patch(`${API_BASE_URL}/${resultId}/reject`, {}, { withCredentials: true });
           updateMatchInState(response.data);
           break;
-        case 'generate-code':
+        case 'generate-code': // Changed from generate-token
           response = await axios.post(`${API_BASE_URL}/${resultId}/generate-code`, {}, { withCredentials: true });
           const match = matches.find(m => m._id === resultId);
           const itemTitle = match?.lostQuery?.objectName || match?.foundQuery?.objectName;
           setTransferCodeInfo({ code: response.data.transferCode, title: itemTitle });
           break;
-        case 'verify-code':
+        case 'verify-code': // Changed from verify-token
           response = await axios.post(`${API_BASE_URL}/${resultId}/verify-code`, { code: data.code }, { withCredentials: true });
           updateMatchInState(response.data.match);
           setAlertInfo({ message: 'Transfer completed successfully!', type: 'success' });
@@ -199,10 +188,8 @@ const ResultsPage = () => {
         title: 'Complete Transfer',
         message: 'Please enter the 6-digit transfer code to complete the item return.',
         onConfirm: (code) => {
-            if (code && code.length === 6) {
+            if (code) {
                 handleMatchAction('verify-code', resultId, { code });
-            } else {
-                setAlertInfo({ message: 'Please enter a valid 6-digit code.', type: 'error'});
             }
             setVerifyModalInfo(null);
         },
@@ -223,7 +210,7 @@ const ResultsPage = () => {
   };
   
   const openChatModal = (partnerId, itemTitle) => {
-    if (partnerId === currentUserId) {
+    if (partnerId === CURRENT_USER_ID) {
       setAlertInfo({ message: "You cannot chat with yourself!", type: 'info' });
       return;
     }
@@ -238,7 +225,7 @@ const ResultsPage = () => {
 
   const filteredResults = matches.filter((match) => {
     const query = searchQuery.toLowerCase();
-    const itemToShow = match.lostItemOwner?._id === currentUserId ? match.foundQuery : match.lostQuery;
+    const itemToShow = match.lostItemOwner?._id === CURRENT_USER_ID ? match.foundQuery : match.lostQuery;
     return (
       itemToShow?.objectName?.toLowerCase().includes(query) ||
       itemToShow?.objectDescription?.toLowerCase().includes(query)
@@ -277,7 +264,7 @@ const ResultsPage = () => {
                   </div>
                 </div>
 
-                {loading && <div className="flex flex-col items-center justify-center p-10 text-gray-500"><Loader className="animate-spin mb-4" size={48} /><span className="text-xl font-semibold">Loading Matches...</span></div>}
+                {loading && <div className="flex flex-col items-center justify-center p-10 text-gray-500"><Loader className="animate-spin mb-4" size={48} /><span className="text-xl font-semibold">Searching for Matches...</span></div>}
                 {error && <p className="text-center text-red-500 text-xl p-10">{error}</p>}
 
                 {!loading && !error && (
@@ -285,8 +272,7 @@ const ResultsPage = () => {
                     {filteredResults.length > 0 ? (
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {filteredResults.map((match) => {
-                          // Correctly determine if the current user is the owner of the lost item
-                          const isOwnerOfLostItem = match.lostItemOwner?._id === currentUserId;
+                          const isOwnerOfLostItem = match.lostItemOwner?._id === CURRENT_USER_ID;
                           const itemToShow = isOwnerOfLostItem ? match.foundQuery : match.lostQuery;
                           const partner = isOwnerOfLostItem ? match.foundItemHolder : match.lostItemOwner;
                           const dateType = isOwnerOfLostItem ? "Found on" : "Lost on";
@@ -307,7 +293,7 @@ const ResultsPage = () => {
                                   </div>
                                   <div className="flex items-center gap-2">
                                     <Calendar size={16} className="text-indigo-500" />
-                                    <span>{dateType}: <strong className="text-gray-700">{dateValue ? new Date(dateValue).toLocaleDateString() : 'N/A'}</strong></span>
+                                    <span>{dateType}: <strong className="text-gray-700">{new Date(dateValue).toLocaleDateString()}</strong></span>
                                   </div>
                                 </div>
                                 
@@ -327,12 +313,15 @@ const ResultsPage = () => {
                                             <button onClick={() => handleVerify(match._id)} disabled={actionLoading[match._id]} className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 rounded-lg font-semibold text-white text-base transition-all duration-300 hover:bg-blue-700 active:scale-95 disabled:bg-gray-400">
                                                 {actionLoading[match._id] ? <Loader size={18} className="animate-spin"/> : <ShieldCheck size={18}/>} Complete Transfer
                                             </button>
+                                            
                                         ) : (
                                             <button onClick={() => handleMatchAction('generate-code', match._id)} disabled={actionLoading[match._id]} className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 rounded-lg font-semibold text-white text-base transition-all duration-300 hover:bg-indigo-700 active:scale-95 disabled:bg-gray-400">
                                                 {actionLoading[match._id] ? <Loader size={18} className="animate-spin"/> : <KeyRound size={18}/>} Show Transfer Code
                                             </button>
-                                        )
-                                    )}
+                                        ) 
+                                    ) 
+
+                                    }
                                      <button onClick={() => openChatModal(partner?._id, itemToShow?.objectName)} className="w-full mt-2 flex items-center justify-center gap-2 px-4 py-2 bg-gray-600 rounded-lg font-semibold text-white text-base transition-all duration-300 hover:bg-gray-700 active:scale-95">
                                         <MessageSquare size={18} /> Chat with {partner?.name}
                                     </button>
@@ -361,7 +350,7 @@ const ResultsPage = () => {
             </div>
         )}
 
-        {chatPartner && <ChatModal currentUserId={currentUserId} chatPartner={{ id: chatPartner.id, title: chatPartner.title }} onClose={closeChatModal}/>}
+        {chatPartner && <ChatModal currentUserId={CURRENT_USER_ID} chatPartner={{ id: chatPartner.id, title: chatPartner.title }} onClose={closeChatModal}/>}
         {transferCodeInfo && <TransferCodeModal code={transferCodeInfo.code} title={transferCodeInfo.title} onClose={() => setTransferCodeInfo(null)} />}
         {alertInfo && <AlertModal message={alertInfo.message} type={alertInfo.type} onClose={() => setAlertInfo(null)} />}
         {verifyModalInfo && <InputModal {...verifyModalInfo} />}

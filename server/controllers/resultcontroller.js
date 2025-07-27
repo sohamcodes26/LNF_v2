@@ -17,7 +17,7 @@ export const getMyMatches = async (req, res) => {
         .populate('foundItemHolder', 'name email')
         .sort({ createdAt: -1 });
 
-        res.status(200).json(matches);
+        res.status(200).json({userId, matches});
     } catch (error) {
         console.error('Error fetching matches:', error);
         res.status(500).json({ message: 'Server error while fetching matches.' });

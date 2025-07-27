@@ -103,7 +103,8 @@ const FoundItems = () => {
                   key={item._id}
                   className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200"
                 >
-                  {item.objectImage ? (
+
+                  {console.log(item.objectImage) && item.objectImage ? (
                     <img
                       src={item.objectImage}
                       alt={item.objectName || "Found Item"}
@@ -114,7 +115,8 @@ const FoundItems = () => {
                           "https://placehold.co/400x300/E0E0E0/6C757D?text=No+Image";
                       }}
                     />
-                  ) : (
+                  ) : 
+                  ( 
                     <div className="w-full h-48 bg-gray-300 flex items-center justify-center text-gray-500">
                       <FaBoxOpen className="text-5xl" />
                       <span className="ml-2">No Image Available</span>
