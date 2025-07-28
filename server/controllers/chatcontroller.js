@@ -51,9 +51,7 @@ export const sendMessage = async (req, res) => {
             return res.status(403).json({ message: 'Sender is not a member of this chat room.' });
         }
 
-        const receiverId = room.users.find(id => id.toString() !== senderId);
-
-        // ✅ FIX: Added a check to ensure a receiver was found.
+        const receiverId = room.users.find(id => id.toString() !== senderId);
         if (!receiverId) {
             console.error(`Could not find a receiver in room ${roomId} for sender ${senderId}`);
             return res.status(500).json({ message: 'Internal server error: Chat room is invalid.' });
@@ -67,7 +65,7 @@ export const sendMessage = async (req, res) => {
         });
         await chatMessage.save();
         
-        const populatedMessage = await chatMessage.populate('sender', 'email name'); // Assuming 'name' field exists
+        const populatedMessage = await chatMessage.populate('sender', 'email name'); 
 
         const io = req.app.get('socketio');
         io.to(roomId).emit('newMessage', populatedMessage);
@@ -99,7 +97,7 @@ export const getChatHistory = async (req, res) => {
 
         const messages = await ChatMessage.find({ chatRoom: roomId })
             .sort({ createdAt: 1 })
-            .populate('sender'); // Assuming 'name' field exists
+            .populate('sender'); 
 
         ChatMessage.updateMany(
             { chatRoom: roomId, receiver: userId, read: false },

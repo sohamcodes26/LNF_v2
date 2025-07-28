@@ -12,9 +12,7 @@ const PostFoundPage = () => {
   const [locationFound, setLocationFound] = useState('');
   const [dateFound, setDateFound] = useState('');
   const [submitted, setSubmitted] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-
-  // MODIFIED: Location list now only includes the specified general locations and buildings.
+  const [isLoading, setIsLoading] = useState(false);
   const campusLocations = useMemo(() => {
     const generalLocations = ['Campus', 'Grounds'];
     const buildings = ['A', 'B', 'C', 'D', 'E'];

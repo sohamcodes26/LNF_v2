@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'; // 1. Import useMemo
+import React, { useState, useMemo } from 'react'; 
 import { Link } from 'react-router-dom';
 import { Search, ArrowLeft, Lightbulb, Upload } from 'lucide-react';
 import Button from '../components/ui/Button';
@@ -12,9 +12,7 @@ const FindLostItemPage = () => {
   const [locationLost, setLocationLost] = useState('');
   const [dateLost, setDateLost] = useState('');
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
-
-  // 2. Generate location list
+  const [message, setMessage] = useState('');
   const campusLocations = useMemo(() => {
     const generalLocations = ['Campus', 'Grounds'];
     const buildings = ['A', 'B', 'C', 'D', 'E'];
@@ -117,7 +115,7 @@ const FindLostItemPage = () => {
 
               <div>
                 <Label htmlFor="location-lost">Location Lost</Label>
-                {/* 3. Replaced input with select dropdown */}
+                {}
                 <select
                   id="location-lost"
                   value={locationLost}

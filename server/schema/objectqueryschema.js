@@ -1,23 +1,21 @@
-import mongoose from 'mongoose';
-
-// --- Shared AI Feature Fields ---
+import mongoose from 'mongoose';
 const aiFeatureFields = {
     canonicalLabel: {
         type: String,
         trim: true,
-        index: true // Add an index for faster searching
+        index: true 
     },
     text_embedding: {
-        type: [Number] // Array of numbers
+        type: [Number] 
     },
     shape_features: {
-        type: [Number] // Array of numbers
+        type: [Number] 
     },
     color_features: {
-        type: [Number] // Array of numbers
+        type: [Number] 
     },
     texture_features: {
-        type: [Number] // Array of numbers
+        type: [Number] 
     }
 };
 
@@ -39,7 +37,7 @@ const lostItemSchema = new mongoose.Schema({
     },
     objectImage: {
         type: String,
-        required: false // Image is optional for lost items
+        required: false 
     },
     locationLost: {
         type: String,
@@ -55,7 +53,7 @@ const lostItemSchema = new mongoose.Schema({
         enum: ['not_resolved', 'resolved'],
         default: 'not_resolved'
     },
-    ...aiFeatureFields // Add all the AI feature fields here
+    ...aiFeatureFields 
 },
 {
     timestamps: true,
@@ -96,7 +94,7 @@ const foundItemSchema = new mongoose.Schema({
         enum: ['not_resolved', 'resolved'],
         default: 'not_resolved'
     },
-    ...aiFeatureFields // Add all the AI feature fields here
+    ...aiFeatureFields 
 },
 {
     timestamps: true,

@@ -1,9 +1,7 @@
-import Result from '../schema/resultschema.js'; // Adjust path as needed
+import Result from '../schema/resultschema.js'; 
 import mongoose from 'mongoose';
 
-/**
- * Retrieves all match results relevant to the authenticated user.
- */
+
 export const getMyMatches = async (req, res) => {
     const userId = req.id;
 
@@ -24,9 +22,7 @@ export const getMyMatches = async (req, res) => {
     }
 };
 
-/**
- * Rejects a specific match result.
- */
+
 export const rejectMatch = async (req, res) => {
     const { resultId } = req.params;
     const userId = req.id;
@@ -56,9 +52,7 @@ export const rejectMatch = async (req, res) => {
     }
 };
 
-/**
- * Confirms a specific match result and rejects all other related matches.
- */
+
 export const confirmMatch = async (req, res) => {
     const { resultId } = req.params;
     const userId = req.id;
@@ -102,10 +96,7 @@ export const confirmMatch = async (req, res) => {
     }
 };
 
-/**
- * Generates a 6-digit transfer code.
- * Only the user who found the item can generate this.
- */
+
 export const generateTransferCode = async (req, res) => {
     const { resultId } = req.params;
     const userId = req.id;
@@ -124,9 +115,7 @@ export const generateTransferCode = async (req, res) => {
 
         const code = Math.floor(100000 + Math.random() * 900000).toString();
         match.transferCode = code;
-        await match.save();
-
-        // Return the code for the frontend to display
+        await match.save();
         res.status(200).json({ transferCode: code });
 
     } catch (error) {
@@ -135,10 +124,7 @@ export const generateTransferCode = async (req, res) => {
     }
 };
 
-/**
- * Verifies a transfer code and completes the transfer.
- * Only the user who lost the item can verify.
- */
+
 export const verifyTransferCode = async (req, res) => {
     const { resultId } = req.params;
     const userId = req.id;
@@ -161,11 +147,9 @@ export const verifyTransferCode = async (req, res) => {
         }
         if (match.transferCode !== code) {
             return res.status(400).json({ message: 'Invalid or expired transfer code.' });
-        }
-
-        // Success! Update status and clear the code.
+        }
         match.status = 'transfer_complete';
-        match.transferCode = null; // Clear the code for security
+        match.transferCode = null; 
         await match.save();
 
         res.status(200).json({ message: 'Transfer complete!', match });

@@ -4,7 +4,7 @@ import { FaArrowLeft, FaQuestionCircle, FaEnvelope, FaPhone, FaInfoCircle } from
 const Help = () => {
   return (
     <div className="min-h-screen bg-gray-200 p-4 sm:p-6 relative flex flex-col">
-      {/* Back to Home Button */}
+      {}
       <a
         href="/"
         className="absolute top-4 left-4 sm:top-6 sm:left-6 flex items-center text-blue-700 hover:text-blue-900 transition duration-200 font-semibold z-10"
@@ -18,9 +18,9 @@ const Help = () => {
           <p className="mt-1 text-blue-100">Find answers to your questions or contact us.</p>
         </div>
 
-        {/* Main content area - now a grid */}
+        {}
         <div className="p-6 flex-grow grid grid-cols-1 md:grid-cols-2 gap-8 overflow-y-auto custom-scrollbar">
-          {/* FAQ Section */}
+          {}
           <div className="bg-gray-50 rounded-lg p-5 border border-gray-200 shadow-sm flex flex-col">
             <h2 className="text-xl font-semibold mb-4 text-gray-800 flex items-center flex-shrink-0">
               <FaQuestionCircle className="mr-2 text-blue-500" /> Frequently Asked Questions
@@ -45,7 +45,7 @@ const Help = () => {
             </div>
           </div>
 
-          {/* Contact Us Section */}
+          {}
           <div className="bg-gray-50 rounded-lg p-5 border border-gray-200 shadow-sm flex flex-col">
             <h2 className="text-xl font-semibold mb-4 text-gray-800 flex items-center flex-shrink-0">
               <FaEnvelope className="mr-2 text-blue-500" /> Contact Us
@@ -67,7 +67,7 @@ const Help = () => {
           </div>
         </div>
       </div>
-      {/* Custom Scrollbar Style */}
+      {}
       <style>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 8px;

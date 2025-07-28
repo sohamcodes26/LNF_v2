@@ -1,19 +1,13 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import axios from 'axios';
-
-// Configure axios to send cookies with every request
+import axios from 'axios';
 axios.defaults.withCredentials = true;
 
-const AuthContext = createContext(null);
-
-// This URL now matches your server.js configuration
+const AuthContext = createContext(null);
 const API_URL = 'http://localhost:8000/apis/lost-and-found/auth';
 
 export const AuthProvider = ({ children }) => {
-  const [authState, setAuthState] = useState('loading'); // loading, unauthenticated, pending-verification, authenticated
-  const [userEmail, setUserEmail] = useState(null);
-
-  // Check if user is already logged in when the app loads
+  const [authState, setAuthState] = useState('loading'); 
+  const [userEmail, setUserEmail] = useState(null);
   useEffect(() => {
     const validateUser = async () => {
       try {
@@ -26,8 +20,7 @@ export const AuthProvider = ({ children }) => {
     validateUser();
   }, []);
 
-  const signup = async (fullName, email, password) => {
-    // Note: Your backend doesn't seem to use fullName yet, but we pass it for future use.
+  const signup = async (fullName, email, password) => {
     await axios.post(`${API_URL}/signup`, { email, password, fullName });
     setUserEmail(email);
     setAuthState('pending-verification');

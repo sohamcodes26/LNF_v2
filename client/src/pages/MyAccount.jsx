@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { FaArrowLeft } from 'react-icons/fa'; // Assuming you have react-icons installed
+import { FaArrowLeft } from 'react-icons/fa'; 
 
 const MyAccount = () => {
   const [profile, setProfile] = useState({ fullName: '', email: '' });
@@ -8,44 +8,26 @@ const MyAccount = () => {
   const [error, setError] = useState('');
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const [passwordMessage, setPasswordMessage] = useState('');
-
-  // --- Fetch Profile Data ---
+  const [passwordMessage, setPasswordMessage] = useState('');
   useEffect(() => {
-    const fetchProfile = async () => {
-      // In a real application, consider a global state for the token or a context API
-      // If the token is httpOnly cookie, client-side JS cannot read it from localStorage.
-      // In that case, the server would implicitly handle the cookie for authentication.
-      // For this frontend code, assuming the token might still be in localStorage for client-side use (if not httpOnly).
-      const token = localStorage.getItem('token'); 
-
-      // If token is httpOnly, you might not need to pass it explicitly in headers.
-      // The browser will automatically send the cookie.
-      // However, if your validate_token middleware *also* checks for Authorization: Bearer,
-      // then you still need this for non-cookie-based clients or if you combine methods.
-      // For cross-origin requests with credentials (cookies), `withCredentials: true` is crucial for axios.
+    const fetchProfile = async () => {
+      const token = localStorage.getItem('token'); 
       const config = {
-        headers: {
-          // Only include Authorization header if your backend expects it for this route AND
-          // your token isn't solely httpOnly. If solely httpOnly, the browser sends the cookie.
-          // Authorization: token ? `Bearer ${token}` : undefined
+        headers: {
         },
-        withCredentials: true // Important for sending httpOnly cookies in cross-origin requests
+        withCredentials: true 
       };
 
 
       try {
-        setLoading(true); // Ensure loading is true before fetch
+        setLoading(true); 
         const res = await axios.get('http://localhost:8000/apis/lost-and-found/MyAccount/getprofile', config);
         setProfile(res.data);
-        setError(''); // Clear previous errors on successful fetch
+        setError(''); 
       } catch (err) {
-        console.error("Error fetching profile:", err);
-        // Better error handling: Check for 401/403 for re-authentication
+        console.error("Error fetching profile:", err);
         if (err.response && (err.response.status === 401 || err.response.status === 403)) {
-            setError('Session expired or not authenticated. Please log in again.');
-            // Optionally redirect to login page here
-            // window.location.href = '/login'; 
+            setError('Session expired or not authenticated. Please log in again.');
         } else {
             setError(err.response?.data?.message || 'Failed to load profile. Please try again.');
         }
@@ -55,12 +37,10 @@ const MyAccount = () => {
     };
 
     fetchProfile();
-  }, []);
-
-  // --- Handle Change Password ---
+  }, []);
   const handleChangePassword = async (e) => {
     e.preventDefault();
-    setPasswordMessage(''); // Clear previous messages
+    setPasswordMessage(''); 
 
     if (!oldPassword || !newPassword) {
       setPasswordMessage('Both password fields are required.');
@@ -74,11 +54,9 @@ const MyAccount = () => {
 
     const token = localStorage.getItem('token');
     const config = {
-      headers: {
-        // Same note as above: Authorization header needed if your backend requires it
-        // Authorization: token ? `Bearer ${token}` : undefined
+      headers: {
       },
-      withCredentials: true // Important for sending httpOnly cookies in cross-origin requests
+      withCredentials: true 
     };
 
     try {
@@ -98,9 +76,9 @@ const MyAccount = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 p-4 sm:p-6 relative">
-      {/* Back to Home Button */}
+      {}
       <a
-        href="/" // Assuming '/' is your home route. Use React Router's <Link> if you have it.
+        href="/" 
         className="absolute top-4 left-4 sm:top-6 sm:left-6 flex items-center text-blue-600 hover:text-blue-800 transition duration-200"
       >
         <FaArrowLeft className="mr-2" /> Back to Home
@@ -124,7 +102,7 @@ const MyAccount = () => {
 
           {!loading && !error && (
             <>
-              {/* Profile Info Section */}
+              {}
               <div className="bg-gray-50 rounded-lg p-5 border border-gray-200">
                 <h2 className="text-xl font-semibold mb-3 text-gray-800 flex items-center">
                   <span className="mr-2 text-blue-500">
@@ -140,7 +118,7 @@ const MyAccount = () => {
                 </div>
               </div>
 
-              {/* Change Password Form */}
+              {}
               <form onSubmit={handleChangePassword} className="bg-gray-50 rounded-lg p-5 border border-gray-200 space-y-4">
                 <h2 className="text-xl font-semibold text-gray-800 flex items-center">
                   <span className="mr-2 text-blue-500">

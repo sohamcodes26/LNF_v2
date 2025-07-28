@@ -1,14 +1,7 @@
-import axios from 'axios';
-
-// IMPORTANT: Replace this with your actual Hugging Face Space URL
-// It will look like: https://<your-hf-username>-<your-space-name>.hf.space
+import axios from 'axios';
 const FLASK_API_URL = "https://sohamnk-lost-and-found-ai-pipeline.hf.space";
 
-/**
- * Calls the Flask server to process an item's details and get its features.
- * @param {object} itemData - Contains objectName, objectDescription, objectImage (URL).
- * @returns {Promise<object|null>} - A promise that resolves to the features object or null on error.
- */
+
 export const processItemFeatures = async (itemData) => {
     try {
         console.log('Calling Flask API to process item features...');
@@ -22,12 +15,7 @@ export const processItemFeatures = async (itemData) => {
     }
 };
 
-/**
- * Calls the Flask server to compare a query item against a list of other items.
- * @param {object} queryItem - The item to find matches for (must include feature fields).
- * @param {Array<object>} searchList - The list of items to search against (must include feature fields).
- * @returns {Promise<object|null>} - A promise that resolves to the match results or null on error.
- */
+
 export const findMatches = async (queryItem, searchList) => {
     try {
         console.log(`Calling Flask API to compare ${queryItem._id} against ${searchList.length} items...`);

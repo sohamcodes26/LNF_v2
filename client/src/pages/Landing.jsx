@@ -1,21 +1,21 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, PlusCircle, LogIn, UserPlus, Mail, Phone, MapPin } from 'lucide-react';
-import { useAuth } from '../context/AuthContext'; // Assuming useAuth provides isAuthenticated
+import { useAuth } from '../context/AuthContext'; 
 
 import AuthModal from '../components/auth/AuthModal';
 import LoginForm from '../components/auth/LoginForm';
 import SignUpForm from '../components/auth/SignUpForm';
 import OtpForm from '../components/auth/OtpForm';
 import ProfileButton from '../components/nav/ProfileButton';
-import Sidebar from '../components/nav/Sidebar'; // Assuming Sidebar component
+import Sidebar from '../components/nav/Sidebar'; 
 
 import backgroundImageUrl from '../assets/image.png';
 
 const LandingPage = () => {
   const [modalView, setModalView] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const { isAuthenticated, authState } = useAuth(); // Get isAuthenticated from your AuthContext
+  const { isAuthenticated, authState } = useAuth(); 
 
   const renderModalContent = () => {
     if (authState === 'pending-verification') {
@@ -31,15 +31,12 @@ const LandingPage = () => {
   };
 
   const isModalOpen = authState === 'pending-verification' || modalView !== null;
-  const closeModal = () => setModalView(null);
-
-  // Function to handle clicks on protected buttons
+  const closeModal = () => setModalView(null);
   const handleProtectedButtonClick = (e, targetPath) => {
     if (!isAuthenticated) {
-      e.preventDefault(); // Prevent navigation
-      setModalView('login'); // Open login modal
-    } else {
-      // If authenticated, allow navigation (Link handles this)
+      e.preventDefault(); 
+      setModalView('login'); 
+    } else {
     }
   };
 
@@ -47,17 +44,17 @@ const LandingPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 font-sans">
-      {/* Pass a 'side' prop to Sidebar to indicate opening from right */}
+      {}
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} side="right" />
 
-      {/* Authentication Modal Logic */}
+      {}
       {isModalOpen && !isAuthenticated && (
         <AuthModal closeModal={closeModal}>
           {renderModalContent()}
         </AuthModal>
       )}
 
-      {/* Header Section */}
+      {}
       <header
         className="relative min-h-[60vh] md:min-h-[75vh] bg-cover bg-center text-white flex flex-col"
         style={{ backgroundImage: `url(${backgroundImageUrl})` }}
@@ -94,7 +91,7 @@ const LandingPage = () => {
             Connect with your campus community through our AI-powered Lost & Found platform. Post found items, search for lost belongings, and reunite with what matters most.
           </p>
           <div className="mt-10 flex flex-col sm:flex-row gap-4">
-            {/* Find My Lost Item Button */}
+            {}
             <Link
               to={isAuthenticated ? "/find-lost-item" : "#"}
               onClick={(e) => handleProtectedButtonClick(e, "/find-lost-item")}
@@ -109,7 +106,7 @@ const LandingPage = () => {
               <span>Find My Lost Item</span>
             </Link>
 
-            {/* Post Found Item Button */}
+            {}
             <Link
               to={isAuthenticated ? "/post-found" : "#"}
               onClick={(e) => handleProtectedButtonClick(e, "/post-found")}
@@ -127,7 +124,7 @@ const LandingPage = () => {
         </div>
       </header>
 
-      {/* How It Works Section */}
+      {}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-6 text-center">
           <h2 className="text-4xl font-bold text-gray-800 mb-4">How It Works</h2>
@@ -157,7 +154,7 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Footer Section */}
+      {}
       <footer className="bg-slate-800 text-slate-300">
         <div className="container mx-auto px-6 py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">

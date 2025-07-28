@@ -1,11 +1,9 @@
-// src/ChatModal.jsx
+
 import React,{ useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 import { Send, X, Loader } from 'lucide-react';
-import axios from 'axios'; // For API calls to your backend
-
-// The Socket.IO client instance. Connects to your backend's Socket.IO server.
-const socket = io('http://localhost:8000', { // Ensure this port is correct
+import axios from 'axios'; 
+const socket = io('http://localhost:8000', { 
     withCredentials: true
 });
 
@@ -15,21 +13,17 @@ const ChatModal = ({ currentUserId, chatPartner, onClose }) => {
     const [roomId, setRoomId] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
-    const messagesEndRef = useRef(null);
-
-    // Auto-scroll to the bottom of messages
+    const messagesEndRef = useRef(null);
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    };
-
-    // 1. Get or Create Chat Room and Fetch History
+    };
     useEffect(() => {
         const establishChatRoom = async () => {
             setIsLoading(true);
             setError(null);
             try {
                 const response = await axios.post(
-                    'http://localhost:8000/apis/lost-and-found/chat/room', // Using relative URL
+                    'http://localhost:8000/apis/lost-and-found/chat/room', 
                     { otherUserId: chatPartner.id },
                     { withCredentials: true }
                 );
@@ -59,19 +53,13 @@ const ChatModal = ({ currentUserId, chatPartner, onClose }) => {
         return () => {
             setMessages([]);
         };
-    }, [currentUserId, chatPartner]);
-
-    // 4. Listen for New Messages via Socket.IO
+    }, [currentUserId, chatPartner]);
     useEffect(() => {
-        const handleNewMessage = (newMessage) => {
-            // New message from socket.io might have sender populated differently
-            // Ensure consistency by checking if sender is an object and accessing its _id
+        const handleNewMessage = (newMessage) => {
             const senderIdFromSocket = newMessage.sender?._id || newMessage.sender;
 
             if (newMessage.chatRoom === roomId) {
-                setMessages((prevMessages) => {
-                    // Prevent duplicate messages if the message is already in the list
-                    // This can happen if the backend sends it via socket AND the client's own POST receives it.
+                setMessages((prevMessages) => {
                     const isDuplicate = prevMessages.some(
                         (msg) => msg._id === newMessage._id
                     );
@@ -85,20 +73,13 @@ const ChatModal = ({ currentUserId, chatPartner, onClose }) => {
         return () => {
             socket.off('newMessage', handleNewMessage);
         };
-    }, [roomId]);
-
-    // Auto-scroll on messages update
+    }, [roomId]);
     useEffect(() => {
         scrollToBottom();
-    }, [messages]);
-
-    // 5. Send Message Function
+    }, [messages]);
     const handleSendMessage = async () => {
         if (inputMessage.trim() && roomId) {
-            try {
-                // When sending, the message will be added to the state via the socket.io listener,
-                // so we don't need to manually add it here immediately.
-                // The socket.io handler should deal with adding it and ensuring no duplicates.
+            try {
                 await axios.post(
                     'http://localhost:8000/apis/lost-and-found/chat/message',
                     { roomId, message: inputMessage.trim() },
@@ -133,7 +114,7 @@ const ChatModal = ({ currentUserId, chatPartner, onClose }) => {
                     </button>
                 </header>
 
-                {/* Message Display Area */}
+                {}
                 <div className="flex-grow overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                     {isLoading ? (
                         <div className="flex items-center justify-center h-full text-gray-500">
@@ -170,7 +151,7 @@ const ChatModal = ({ currentUserId, chatPartner, onClose }) => {
                     <div ref={messagesEndRef} />
                 </div>
 
-                {/* Message Input */}
+                {}
                 <footer className="p-4 border-t border-gray-200">
                     <div className="flex items-center space-x-2">
                         <input

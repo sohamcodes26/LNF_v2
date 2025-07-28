@@ -43,16 +43,13 @@ export const reportLostItem = async (req, res) => {
         }
         
         await newLostItem.save();
-        console.log(`Saved new lost item with ID: ${newLostItem._id}`);
-
-        // --- NEW: CALCULATE DATE RANGE FOR FILTERING ---
-        // A found item is a potential match if it was found up to 3 days *before* the item was lost, or any time after.
+        console.log(`Saved new lost item with ID: ${newLostItem._id}`);
         const threeDaysBeforeLost = new Date(newLostItem.dateLost);
         threeDaysBeforeLost.setDate(threeDaysBeforeLost.getDate() - 3);
 
         const searchFilter = {
             canonicalLabel: newLostItem.canonicalLabel,
-            dateFound: { $gte: threeDaysBeforeLost }, // Add the date filter
+            dateFound: { $gte: threeDaysBeforeLost }, 
             $or: [
                 { locationFound: newLostItem.locationLost },
                 { locationFound: "No Idea" },
@@ -146,16 +143,13 @@ export const reportFoundItem = async (req, res) => {
         }
 
         await newFoundItem.save();
-        console.log(`Saved new found item with ID: ${newFoundItem._id}`);
-
-        // --- NEW: CALCULATE DATE RANGE FOR FILTERING ---
-        // A lost item is a potential match if it was lost any time *before* the item was found, or up to 3 days after.
+        console.log(`Saved new found item with ID: ${newFoundItem._id}`);
         const threeDaysAfterFound = new Date(newFoundItem.dateFound);
         threeDaysAfterFound.setDate(threeDaysAfterFound.getDate() + 3);
 
         const searchFilter = {
             canonicalLabel: newFoundItem.canonicalLabel,
-            dateLost: { $lte: threeDaysAfterFound }, // Add the date filter
+            dateLost: { $lte: threeDaysAfterFound }, 
             $or: [
                 { locationLost: newFoundItem.locationFound },
                 { locationLost: "No Idea" },

@@ -1,25 +1,21 @@
-import { Routes, Route } from 'react-router-dom';
-
-// Page Imports
+import { Routes, Route } from 'react-router-dom';
 import LandingPage from './pages/Landing';
 import PostFoundPage from './pages/PostFound';
 import FindLostItemPage from './pages/FindLostItem';
 import MyAccountPage from './pages/MyAccount';
 import FoundItemsPage from './pages/FoundItems';
 import ReceivedItemsPage from './pages/ReceivedItems';
-import HelpPage from './pages/Help';
-
-// Auth Imports
+import HelpPage from './pages/Help';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import ResultsPage from './pages/Results';
 
 function App() {
   return (
     <Routes>
-      {/* public route */}
+      {}
       <Route path="/" element={<LandingPage />} />
 
-      {/* protected routes */}
+      {}
       <Route element={<ProtectedRoute />}>
         <Route path="/post-found" element={<PostFoundPage />} />
         <Route path="/find-lost-item" element={<FindLostItemPage />} />

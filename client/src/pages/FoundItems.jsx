@@ -103,7 +103,7 @@ const FoundItems = () => {
                   key={item._id}
                   className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200"
                 >
-                  {/* CONSOLE.LOG ADDED/MOVED HERE FOR DEBUGGING */}
+                  {}
                   {console.log('Item ID:', item._id, 'Object Name:', item.objectName, 'Image URL:', item.objectImage)} 
 
                   { item.objectImage ? (

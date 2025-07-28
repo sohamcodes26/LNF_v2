@@ -59,7 +59,7 @@ export const sign_up = async (req, res) => {
                 { email: details.email },
                 {
                     $set: {
-                        fullName: details.fullName, // Also update fullName here
+                        fullName: details.fullName, 
                         'otp': otp,
                         'user_password': hashedpass,
                         'createdAt': new Date()
@@ -67,9 +67,7 @@ export const sign_up = async (req, res) => {
                 }
             );
             return res.status(202).json({ message: 'OTP Verification Restarted. New OTP sent.' });
-        }
-
-        // --- FIX 1: Add fullName when creating the temporary user ---
+        }
         await temp_otp.create({
             fullName: details.fullName,
             email: details.email,
@@ -101,16 +99,12 @@ export const otp_verification = async (req, res) => {
             return res.status(status.code).json({ message: status.message });
         }
 
-        const hashedpass = tempUser.user_password;
-
-        // --- FIX 2: Use the fullName from the tempUser record ---
+        const hashedpass = tempUser.user_password;
         const newUser = await userlogin.create({
-            fullName: tempUser.fullName, // Get the fullName from the temporary record
+            fullName: tempUser.fullName, 
             email: details.email,
             user_password: hashedpass,
-        });
-        
-        // Now that the user is created, delete the temporary record
+        });
         await temp_otp.deleteOne({ email: details.email });
 
         const token = generate_token(newUser);

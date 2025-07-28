@@ -1,9 +1,7 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { User, Archive, CheckSquare, HelpCircle, LogOut, X, Sparkles } from 'lucide-react';
-
-// Added 'side' prop with a default value of 'left' for flexibility
+import { User, Archive, CheckSquare, HelpCircle, LogOut, X, Sparkles } from 'lucide-react';
 const Sidebar = ({ isOpen, onClose, side = 'left' }) => {
   const { logout, userEmail } = useAuth();
   const navigate = useNavigate();
@@ -15,23 +13,21 @@ const Sidebar = ({ isOpen, onClose, side = 'left' }) => {
   };
 
   const linkClass = "flex items-center gap-4 px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors";
-  const activeLinkClass = "bg-blue-100 text-blue-600 font-semibold";
-
-  // Determine classes based on the 'side' prop
+  const activeLinkClass = "bg-blue-100 text-blue-600 font-semibold";
   const sidebarPositionClass = side === 'right' ? 'right-0' : 'left-0';
   const sidebarTransformClass = isOpen
-    ? 'translate-x-0' // No translation when open
-    : (side === 'right' ? 'translate-x-full' : '-translate-x-full'); // Slide out based on side
+    ? 'translate-x-0' 
+    : (side === 'right' ? 'translate-x-full' : '-translate-x-full'); 
 
   return (
     <>
-      {/* Overlay */}
+      {}
       <div
         className={`fixed inset-0 bg-black/60 z-40 transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         onClick={onClose}
       ></div>
 
-      {/* Sidebar Panel */}
+      {}
       <aside
         className={`fixed top-0 h-full w-72 bg-gray-100 shadow-xl z-50 transform transition-transform duration-300
           ${sidebarPositionClass}

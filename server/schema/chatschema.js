@@ -1,4 +1,4 @@
-// src/chatschema.js
+
 
 import mongoose from 'mongoose';
 const { Schema } = mongoose;
@@ -17,16 +17,10 @@ const chatRoomSchema = new Schema({
     }
 }, {
     timestamps: true
-});
+});
+chatRoomSchema.index({ users: 1 }, { unique: true });
 
-// ------------------ THE FIX IS HERE ------------------
-// Create a compound unique index on the 'users' array.
-// This ensures the combination of users is unique.
-chatRoomSchema.index({ users: 1 }, { unique: true });
-// ----------------------------------------------------
-
-const chatMessageSchema = new Schema({
-    // ... your chatMessageSchema remains unchanged
+const chatMessageSchema = new Schema({
     chatRoom: {
         type: Schema.Types.ObjectId,
         ref: 'ChatRoom',
