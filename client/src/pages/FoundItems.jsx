@@ -7,7 +7,7 @@ import {
   FaCalendarAlt,
   FaTag,
   FaUserCircle,
-} from "react-icons/fa"; // Removed FaPhone
+} from "react-icons/fa"; 
 
 import { CheckCircle } from "lucide-react";
 
@@ -103,8 +103,10 @@ const FoundItems = () => {
                   key={item._id}
                   className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200"
                 >
+                  {/* CONSOLE.LOG ADDED/MOVED HERE FOR DEBUGGING */}
+                  {console.log('Item ID:', item._id, 'Object Name:', item.objectName, 'Image URL:', item.objectImage)} 
 
-                  {console.log(item.objectImage) && item.objectImage ? (
+                  { item.objectImage ? (
                     <img
                       src={item.objectImage}
                       alt={item.objectName || "Found Item"}
@@ -116,7 +118,7 @@ const FoundItems = () => {
                       }}
                     />
                   ) : 
-                  ( 
+                  (
                     <div className="w-full h-48 bg-gray-300 flex items-center justify-center text-gray-500">
                       <FaBoxOpen className="text-5xl" />
                       <span className="ml-2">No Image Available</span>

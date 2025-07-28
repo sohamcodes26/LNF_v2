@@ -1,9 +1,7 @@
 import { LostItem, FoundItem } from '../schema/objectqueryschema.js';
-import Result from '../schema/resultschema.js'; // Import the Result schema
+import Result from '../schema/resultschema.js'; 
 import { processItemFeatures, findMatches } from '../services/ai_service.js';
-
-// IMPORTANT: This URL comes from your running ngrok instance.
-const PUBLIC_SERVER_URL = "https://89ba10f59a83.ngrok-free.app"; // <-- Your ngrok URL
+import { uploadCareImage } from '../middlewares/uploadcareUpload.js';
 
 export const reportLostItem = async (req, res) => {
     try {
@@ -14,8 +12,7 @@ export const reportLostItem = async (req, res) => {
             return res.status(400).json({ message: 'Missing required fields for lost item.' });
         }
 
-        const objectImageURL = req.file ? `${PUBLIC_SERVER_URL}/uploads/${req.file.filename}` : null;
-
+        const objectImageURL = req.file ? req.file.path : null; 
         let newLostItem = new LostItem({
             userId, 
             objectName,
@@ -121,7 +118,7 @@ export const reportFoundItem = async (req, res) => {
             return res.status(400).json({ message: 'Image is compulsory for found items.' });
         }
 
-        const objectImageURL = `${PUBLIC_SERVER_URL}/uploads/${req.file.filename}`;
+        const objectImageURL = req.file ? req.file.path : null;
 
         let newFoundItem = new FoundItem({
             userId,

@@ -1,3 +1,9 @@
+import dotenv from 'dotenv'; // This MUST be the first import
+dotenv.config(); // THIS MUST BE THE FIRST EXECUTABLE LINE AFTER ALL INITIAL IMPORTS
+console.log('🔑 Server ENV - UPLOADCARE_PUBLIC_KEY:', process.env.UPLOADCARE_PUBLIC_KEY);
+
+
+// Now, list all other imports AFTER dotenv.config();
 import express, { urlencoded } from "express";
 import cors from 'cors';
 import cookieParser from "cookie-parser";
@@ -12,11 +18,11 @@ import object_query_router from "./routes/objectqueryroute.js";
 import profile_router from "./routes/profileroute.js";
 import my_items_router from "./routes/myitemsroute.js";
 import chat_router from "./routes/chatroute.js";
-import result_router from "./routes/resultroute.js"; // Make sure this is imported
+import result_router from "./routes/resultroute.js";
 
 // --- Import middleware and config ---
 import { connectdb } from "./config/database.js";
-import { validate_token } from "./middlewares/validate_token.js"; // Ensure path is correct
+import { validate_token } from "./middlewares/validate_token.js"; 
 
 // --- Boilerplate for __dirname in ES Modules ---
 const __filename = fileURLToPath(import.meta.url);
@@ -30,7 +36,7 @@ const port = process.env.PORT || 9000;
 // --- Socket.IO Setup ---
 const io = new Server(server, {
     cors: {
-        origin: 'http://localhost:5173', // Your frontend URL
+        origin: 'http://localhost:5173',
         methods: ['GET', 'POST'],
         credentials: true
     }
@@ -51,7 +57,7 @@ app.use(express.json());
 app.use(urlencoded({ extended: false }));
 
 // --- Static File Serving ---
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // --- Database Connection ---
 connectdb();

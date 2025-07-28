@@ -4,7 +4,7 @@ import { Routes, Route } from 'react-router-dom';
 import LandingPage from './pages/Landing';
 import PostFoundPage from './pages/PostFound';
 import FindLostItemPage from './pages/FindLostItem';
-import MyAccountPage from '../../backup/MyAccount';
+import MyAccountPage from './pages/MyAccount';
 import FoundItemsPage from './pages/FoundItems';
 import ReceivedItemsPage from './pages/ReceivedItems';
 import HelpPage from './pages/Help';
