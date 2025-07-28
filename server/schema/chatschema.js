@@ -1,3 +1,5 @@
+// src/chatschema.js
+
 import mongoose from 'mongoose';
 const { Schema } = mongoose;
 
@@ -5,7 +7,7 @@ const chatRoomSchema = new Schema({
     users: {
         type: [{
             type: Schema.Types.ObjectId,
-            ref: 'userlogin' // ✅ FIX: Changed ref to 'userlogin' for consistency
+            ref: 'userlogin'
         }],
         required: true,
         validate: [
@@ -17,9 +19,14 @@ const chatRoomSchema = new Schema({
     timestamps: true
 });
 
+// ------------------ THE FIX IS HERE ------------------
+// Create a compound unique index on the 'users' array.
+// This ensures the combination of users is unique.
 chatRoomSchema.index({ users: 1 }, { unique: true });
+// ----------------------------------------------------
 
 const chatMessageSchema = new Schema({
+    // ... your chatMessageSchema remains unchanged
     chatRoom: {
         type: Schema.Types.ObjectId,
         ref: 'ChatRoom',
@@ -28,12 +35,12 @@ const chatMessageSchema = new Schema({
     },
     sender: {
         type: Schema.Types.ObjectId,
-        ref: 'userlogin', // ✅ FIX: Changed ref to 'userlogin' for consistency
+        ref: 'userlogin',
         required: true
     },
     receiver: {
         type: Schema.Types.ObjectId,
-        ref: 'userlogin', // ✅ FIX: Changed ref to 'userlogin' for consistency
+        ref: 'userlogin',
         required: true
     },
     message: {
@@ -48,6 +55,7 @@ const chatMessageSchema = new Schema({
 }, {
     timestamps: true
 });
+
 
 const ChatRoom = mongoose.model('ChatRoom', chatRoomSchema);
 const ChatMessage = mongoose.model('ChatMessage', chatMessageSchema);

@@ -9,12 +9,13 @@ export const getOrCreateChatRoom = async (req, res) => {
         return res.status(400).json({ message: 'otherUserId is required.' });
     }
 
-    // Prevent a user from creating a chat room with themselves
     if (currentUserId === otherUserId) {
         return res.status(400).json({ message: 'Cannot create a chat room with yourself.' });
     }
 
-    const sortedUsers = [currentUserId, otherUserId].sort();
+    const sortedUsers = [currentUserId, otherUserId]
+        .map(id => new mongoose.Types.ObjectId(id))
+        .sort((a, b) => a.toString().localeCompare(b.toString()));
 
     try {
         let room = await ChatRoom.findOne({ users: sortedUsers });
