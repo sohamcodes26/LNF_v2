@@ -37,11 +37,12 @@ const io = new Server(server, {
 app.set('socketio', io);
 
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: ['http://localhost:5173', 'https://your-frontend.onrender.com'],
     methods: ['GET', 'POST', 'OPTIONS', 'PATCH', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
 }));
+
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -69,6 +70,11 @@ io.on('connection', (socket) => {
         console.log('User disconnected:', socket.id);
     });
 });
+
+app.get('/', (req, res) => {
+  res.send('Lost and Found Backend is running ✅');
+});
+
 
 server.listen(port, () => {
     console.log(`Server is running on port ${port}`);
