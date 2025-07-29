@@ -43,7 +43,9 @@ export const reportLostItem = async (req, res) => {
         }
         
         await newLostItem.save();
-        console.log(`Saved new lost item with ID: ${newLostItem._id}`);
+        console.log(`Saved new lost item with ID: ${newLostItem._id}`);
+
+
         const threeDaysBeforeLost = new Date(newLostItem.dateLost);
         threeDaysBeforeLost.setDate(threeDaysBeforeLost.getDate() - 3);
 
@@ -143,7 +145,9 @@ export const reportFoundItem = async (req, res) => {
         }
 
         await newFoundItem.save();
-        console.log(`Saved new found item with ID: ${newFoundItem._id}`);
+        console.log(`Saved new found item with ID: ${newFoundItem._id}`);
+
+
         const threeDaysAfterFound = new Date(newFoundItem.dateFound);
         threeDaysAfterFound.setDate(threeDaysAfterFound.getDate() + 3);
 

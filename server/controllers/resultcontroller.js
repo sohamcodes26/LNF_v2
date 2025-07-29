@@ -9,8 +9,10 @@ export const getMyMatches = async (req, res) => {
         const matches = await Result.find({
             $or: [{ lostItemOwner: userId }, { foundItemHolder: userId }]
         })
-        .populate('lostQuery', 'objectName objectDescription objectImage')
-        .populate('foundQuery', 'objectName objectDescription objectImage')
+        // Add dateLost to the list of fields
+        .populate('lostQuery', 'objectName objectDescription objectImage dateLost')
+        // Add dateFound to the list of fields
+        .populate('foundQuery', 'objectName objectDescription objectImage dateFound')
         .populate('lostItemOwner', 'name email')
         .populate('foundItemHolder', 'name email')
         .sort({ createdAt: -1 });
@@ -115,7 +117,8 @@ export const generateTransferCode = async (req, res) => {
 
         const code = Math.floor(100000 + Math.random() * 900000).toString();
         match.transferCode = code;
-        await match.save();
+        await match.save();
+
         res.status(200).json({ transferCode: code });
 
     } catch (error) {
@@ -147,7 +150,8 @@ export const verifyTransferCode = async (req, res) => {
         }
         if (match.transferCode !== code) {
             return res.status(400).json({ message: 'Invalid or expired transfer code.' });
-        }
+        }
+
         match.status = 'transfer_complete';
         match.transferCode = null; 
         await match.save();

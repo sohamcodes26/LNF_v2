@@ -2,7 +2,8 @@
 import React,{ useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 import { Send, X, Loader } from 'lucide-react';
-import axios from 'axios'; 
+import axios from 'axios'; 
+
 const socket = io('http://localhost:8000', { 
     withCredentials: true
 });
@@ -13,10 +14,12 @@ const ChatModal = ({ currentUserId, chatPartner, onClose }) => {
     const [roomId, setRoomId] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
-    const messagesEndRef = useRef(null);
+    const messagesEndRef = useRef(null);
+
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    };
+    };
+
     useEffect(() => {
         const establishChatRoom = async () => {
             setIsLoading(true);
@@ -40,7 +43,7 @@ const ChatModal = ({ currentUserId, chatPartner, onClose }) => {
 
             } catch (err) {
                 console.error('Error establishing chat room or fetching history:', err);
-                setError('Failed to load chat. Please try again.');
+                setError('No messages yet.');
             } finally {
                 setIsLoading(false);
             }
@@ -53,13 +56,18 @@ const ChatModal = ({ currentUserId, chatPartner, onClose }) => {
         return () => {
             setMessages([]);
         };
-    }, [currentUserId, chatPartner]);
+    }, [currentUserId, chatPartner]);
+
     useEffect(() => {
-        const handleNewMessage = (newMessage) => {
+        const handleNewMessage = (newMessage) => {
+
+
             const senderIdFromSocket = newMessage.sender?._id || newMessage.sender;
 
             if (newMessage.chatRoom === roomId) {
-                setMessages((prevMessages) => {
+                setMessages((prevMessages) => {
+
+
                     const isDuplicate = prevMessages.some(
                         (msg) => msg._id === newMessage._id
                     );
@@ -73,13 +81,18 @@ const ChatModal = ({ currentUserId, chatPartner, onClose }) => {
         return () => {
             socket.off('newMessage', handleNewMessage);
         };
-    }, [roomId]);
+    }, [roomId]);
+
     useEffect(() => {
         scrollToBottom();
-    }, [messages]);
+    }, [messages]);
+
     const handleSendMessage = async () => {
         if (inputMessage.trim() && roomId) {
-            try {
+            try {
+
+
+
                 await axios.post(
                     'http://localhost:8000/apis/lost-and-found/chat/message',
                     { roomId, message: inputMessage.trim() },
@@ -122,7 +135,7 @@ const ChatModal = ({ currentUserId, chatPartner, onClose }) => {
                             <span>Loading Chat...</span>
                         </div>
                     ) : error ? (
-                            <div className="flex items-center justify-center h-full text-red-500">
+                            <div className="flex items-center justify-center h-full text-gray-500">
                                 <span>{error}</span>
                             </div>
                     ) : messages.length === 0 ? (

@@ -5,6 +5,70 @@ import Button from '../components/ui/Button';
 import Label from '../components/ui/Label';
 import axios from 'axios';
 
+import walletImage from '../assets/finalbottle.jpg';
+import calculatorImage from '../assets/calculator.jpg';
+import bottleImage from '../assets/ring.jpg';
+
+
+const synonymMap = [
+  { name: "spectacles", synonyms: ["glasses", "eyewear", "goggles", "frames", "lenses"] },
+  { name: "bottle", synonyms: ["waterbottle", "flask", "sipper", "thermos", "hydrator"] },
+  { name: "charger", synonyms: ["adapter", "powerbrick", "chargingcable", "usbcharger", "wallcharger"] },
+  { name: "laptop", synonyms: ["notebook", "macbook", "chromebook", "thinkpad", "ultrabook"] },
+  { name: "earphones", synonyms: ["earbuds", "airpods", "headphones", "earpieces", "in-ear", "buds"] },
+  { name: "mobile", synonyms: ["phone", "smartphone", "cellphone", "android", "iphone", "handset"] },
+  { name: "idcard", synonyms: ["id", "identitycard", "collegeid", "campusid", "badge", "accesscard"] },
+  { name: "wallet", synonyms: ["purse", "moneybag", "cardholder", "leatherwallet", "cashholder"] },
+  { name: "pen", synonyms: ["ballpen", "gelpen", "inkpen", "stylus", "markerpen"] },
+  { name: "notebook", synonyms: ["diary", "journal", "register", "copy", "logbook"] },
+  { name: "powerbank", synonyms: ["batterybank", "portablecharger", "externalbattery"] },
+  { name: "usbdrive", synonyms: ["pendrive", "flashdrive", "thumbdrive", "memorystick", "stickdrive"] },
+  { name: "mouse", synonyms: ["computer mouse", "wirelessmouse", "touchpad", "clicker"] },
+  { name: "keyboard", synonyms: ["keypad", "typedevice", "wirelesskeyboard"] },
+  { name: "watch", synonyms: ["wristwatch", "smartwatch", "band", "fitband", "timer"] },
+  { name: "bag", synonyms: ["backpack", "bagpack", "rucksack", "satchel", "kitbag", "tote"] },
+  { name: "calculator", synonyms: ["calc", "scientificcalc", "casio", "mathdevice"] },
+  { name: "keys", synonyms: ["lockerkeys", "roomkeys", "keychain", "bikekeys", "housekeys", "keyring"] },
+  { name: "umbrella", synonyms: ["rainshade", "parasol", "raincover"] },
+  { name: "helmet", synonyms: ["bikehelmet", "safetyhelmet", "headgear"] },
+  { name: "cap", synonyms: ["hat", "baseballcap", "headcover", "visor"] },
+  { name: "tiffin", synonyms: ["lunchbox", "dabba", "container", "lunchcase"] },
+  { name: "shoes", synonyms: ["footwear", "sneakers", "trainers", "sportswear", "loafers"] },
+  { name: "slippers", synonyms: ["flipflops", "sandals", "chappals", "slides"] },
+  { name: "simcard", synonyms: ["sim", "networkcard", "telecomchip"] },
+  { name: "otg", synonyms: ["usbconverter", "usbadapter", "otgcable", "typecconnector"] },
+  { name: "remote", synonyms: ["controller", "tvremote", "clicker", "irremote"] },
+  { name: "jacket", synonyms: ["coat", "hoodie", "sweater", "zipper", "blazer", "windcheater"] },
+  { name: "textbook", synonyms: ["book", "coursebook", "referencebook", "module", "subjectbook"] },
+  { name: "marker", synonyms: ["highlighter", "whiteboardpen", "sketchpen", "boardmarker"] },
+  { name: "medicines", synonyms: ["tablets", "pills", "capsules", "strip", "drugs"] },
+  { name: "box", synonyms: ["cardboard", "carton", "rectangular box", "package"] },
+  { name: "earrings", synonyms: ["jewelry", "studs", "jhumkas", "earringset"] },
+  { name: "belt", synonyms: ["waistbelt", "leatherbelt", "strap"] },
+  { name: "coin", synonyms: ["change", "loosechange", "currencycoin", "moneycoin"] },
+  { name: "tripod", synonyms: ["stand", "camerastand", "mobiletripod"] },
+  { name: "camera", synonyms: ["dslr", "digicam", "cam", "photodevice"] },
+  { name: "tablet", synonyms: ["ipad", "tab", "androidtab", "notetab"] },
+  { name: "badge", synonyms: ["tag", "nametag", "idbadge"] },
+  { name: "scarf", synonyms: ["dupatta", "stole", "shawl", "wrap"] },
+  { name: "usb-cable", synonyms: ["datacable", "cord", "chargerwire", "syncwire"] },
+  { name: "harddisk", synonyms: ["hdd", "externaldisk", "backupdrive"] },
+  { name: "tripass", synonyms: ["buspass", "idpass", "commutepass"] },
+  { name: "stationery", synonyms: ["pen", "pencil", "eraser", "sharpener", "scale", "ruler", "sketchpen"] },
+  { name: "helmetlock", synonyms: ["bikelock", "lockchain"] },
+  { name: "lens", synonyms: ["dslrlens", "zoomlens", "cameraaccessory"] },
+  { name: "hairband", synonyms: ["rubberband", "scrunchie", "band"] },
+  { name: "projector", synonyms: ["beamer", "presentationdevice"] },
+  { name: "bikekey", synonyms: ["two-wheelerkey", "vehicleremote"] },
+  { name: "watchstrap", synonyms: ["bandstrap", "watchbelt"] },
+  { name: "perfume", synonyms: ["deodorant", "scent", "spray"] },
+  { name: "lunchbag", synonyms: ["tiffinbag", "dabba-bag", "snackbag"] },
+  { name: "gloves", synonyms: ["handgloves", "mittens", "ridinggloves"] },
+  { name: "sunscreen", synonyms: ["sunblock", "uvlotion", "spfcream"] },
+  { name: "folder", synonyms: ["file", "documentsleeve", "paperholder"] },
+  { name: "projectfile", synonyms: ["report", "assignmentfile", "submissionfile"] }
+];
+
 const FindLostItemPage = () => {
   const [objectName, setObjectName] = useState('');
   const [objectDescription, setObjectDescription] = useState('');
@@ -12,7 +76,45 @@ const FindLostItemPage = () => {
   const [locationLost, setLocationLost] = useState('');
   const [dateLost, setDateLost] = useState('');
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+
+  
+
+const allSynonyms = synonymMap.flatMap(({ name, synonyms }) => [name, ...synonyms]);
+
+const resolveCanonicalName = (input) => {
+  const lowerInput = input.toLowerCase();
+  for (let entry of synonymMap) {
+    if (entry.name === lowerInput || entry.synonyms.includes(lowerInput)) {
+      return entry.name;
+    }
+  }
+  return input;
+};
+
+const handleNameChange = (e) => {
+  const value = e.target.value;
+  setObjectName(value);
+
+  if (value.length > 0) {
+    const matches = allSynonyms.filter((syn) =>
+      syn.toLowerCase().startsWith(value.toLowerCase())
+    );
+    setSuggestions(matches.slice(0, 5));
+  } else {
+    setSuggestions([]);
+  }
+};
+
+const handleSuggestionClick = (value) => {
+  const canonical = resolveCanonicalName(value);
+  setObjectName(canonical);
+  setSuggestions([]);
+};
+
+
+
   const campusLocations = useMemo(() => {
     const generalLocations = ['Campus', 'Grounds'];
     const buildings = ['A', 'B', 'C', 'D', 'E'];
@@ -87,18 +189,32 @@ const FindLostItemPage = () => {
             </div>
 
             <form onSubmit={handleFormSubmit} className="space-y-4">
-              <div>
-                <Label htmlFor="object-name">Object Name</Label>
-                <input
-                  id="object-name"
-                  type="text"
-                  value={objectName}
-                  onChange={(e) => setObjectName(e.target.value)}
-                  placeholder="e.g., iPhone 14 Pro, Blue Backpack"
-                  className="w-full px-4 py-2 text-gray-800 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  required
-                />
-              </div>
+              <div className="relative">
+  <Label htmlFor="object-name">Object Name</Label>
+  <input
+    id="object-name"
+    type="text"
+    value={objectName}
+    onChange={handleNameChange}
+    placeholder="e.g., iPhone 14 Pro, Blue Backpack"
+    className="w-full px-4 py-2 text-gray-800 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+    required
+  />
+  {suggestions.length > 0 && (
+    <ul className="absolute z-10 bg-white border border-gray-200 w-full mt-1 rounded-lg shadow-md max-h-40 overflow-y-auto">
+      {suggestions.map((suggestion, index) => (
+        <li
+          key={index}
+          onClick={() => handleSuggestionClick(suggestion)}
+          className="px-4 py-2 cursor-pointer hover:bg-blue-50 text-sm text-gray-700"
+        >
+          {suggestion}
+        </li>
+      ))}
+    </ul>
+  )}
+</div>
+
 
               <div>
                 <Label htmlFor="object-description">Object Description</Label>
@@ -175,7 +291,7 @@ const FindLostItemPage = () => {
 
               <Button type="submit" variant="primary" disabled={loading}>
                 <Search className="w-5 h-5" />
-                {loading ? 'Reporting...' : 'Report Lost Item'}
+                {loading ? 'Reporting...(You can close this page)' : 'Report Lost Item'}
               </Button>
             </form>
           </div>
@@ -202,7 +318,7 @@ const FindLostItemPage = () => {
               <div className="font-bold text-blue-500">2.</div>
               <div>
                 <h3 className="font-semibold text-gray-800">Accurate Location & Date</h3>
-                <p>Pinpoint where and when you last saw the item. This is crucial for matching.</p>
+                <p>Pinpoint where and when you last saw the item. This is crucial for matching. If you don't know exact location you can choose "campus".</p>
               </div>
             </li>
             <li className="flex gap-4">
@@ -213,6 +329,41 @@ const FindLostItemPage = () => {
               </div>
             </li>
           </ul>
+
+
+ 
+          <div className="mb-6 mt-4"> 
+            <h3 className="text-xl font-bold text-gray-800">Reference Images</h3> 
+            <p className="text-gray-600 text-sm mt-2">
+              Examples of clear images for effective posting.
+            </p>
+          </div>
+          <div className="mt-8 grid grid-cols-3 gap-4">
+            <div className="bg-white rounded-lg shadow-md overflow-hidden">
+              <img
+                src={walletImage}
+                alt="Be Specific"
+                className="w-full h-36 object-cover"
+              />
+            </div>
+            <div className="bg-white rounded-lg shadow-md overflow-hidden">
+              <img
+                src={calculatorImage}
+                alt="Location & Date"
+                className="w-full h-36 object-cover"
+              />
+            </div>
+            <div className="bg-white rounded-lg shadow-md overflow-hidden items-center">
+              <img
+                src={bottleImage}
+                alt="Clear Image"
+                className="w-full h-36 object-cover"
+              />
+            </div>
+          </div>
+          
+          
+          
         </div>
       </div>
     </main>

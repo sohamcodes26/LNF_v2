@@ -7,7 +7,7 @@ export const generate_token = (result) => {
         email: result.email
     };
 
-    const token = jwt.sign(payload,process.env.SECRET_KEY,{expiresIn: '1h'})
+    const token = jwt.sign(payload,process.env.SECRET_KEY,{expiresIn: '24h'})
 
     return token;
 

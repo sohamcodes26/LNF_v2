@@ -11,13 +11,18 @@ import {
   AlertTriangle,
   ShieldCheck,
   XCircle,
-  KeyRound, 
+  KeyRound, // Replaced QrCode with KeyRound
   Info
 } from 'lucide-react';
 
 import axios from 'axios';
-import ChatModal from './ChatModal';
-let CURRENT_USER_ID = 'your_logged_in_user_id'; 
+import ChatModal from './ChatModal';
+
+
+// This should come from your user authentication context/store
+let CURRENT_USER_ID = 'your_logged_in_user_id'; // Replace with the actual logged-in user's ID
+
+// --- Reusable Modal Components ---
 
 const AlertModal = ({ message, onClose, type = 'info' }) => {
   const icons = {
@@ -66,7 +71,9 @@ const InputModal = ({ title, message, onConfirm, onCancel }) => {
       </div>
     </div>
   );
-};
+};
+
+// --- New Modal to display the OTP Code ---
 const TransferCodeModal = ({ code, onClose, title }) => (
   <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 transition-opacity duration-300" onClick={onClose}>
     <div className="bg-white rounded-2xl p-8 text-center relative" onClick={(e) => e.stopPropagation()}>
@@ -90,12 +97,15 @@ const ResultsPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [chatPartner, setChatPartner] = useState(null);
   const [actionLoading, setActionLoading] = useState({});
-  const [transferCodeInfo, setTransferCodeInfo] = useState(null); 
+  const [transferCodeInfo, setTransferCodeInfo] = useState(null); // Replaced qrCodeData
   const [alertInfo, setAlertInfo] = useState(null);
-  const [verifyModalInfo, setVerifyModalInfo] = useState(null);
+  const [verifyModalInfo, setVerifyModalInfo] = useState(null);
+
+  // --- Data Fetching ---
   const fetchMatches = async () => {
     try {
-      setLoading(true);
+      setLoading(true);
+      // Using localhost as requested
       const response = await axios.get('http://localhost:8000/apis/lost-and-found/results/', {
         withCredentials: true,
       });
@@ -113,12 +123,14 @@ const ResultsPage = () => {
 
   useEffect(() => {
     fetchMatches();
-  }, []);
+  }, []);
+
+  // --- State Update Helpers ---
   const updateMatchInState = (updatedMatch) => {
     setMatches(currentMatches =>
       currentMatches.map(m =>
         m._id === updatedMatch._id
-          ? { ...m, status: updatedMatch.status } 
+          ? { ...m, status: updatedMatch.status } // Merge: keep old data, update status
           : m
       )
     );
@@ -136,7 +148,9 @@ const ResultsPage = () => {
         return m;
       })
     );
-  }
+  }
+
+  // --- API Action Handlers (Updated for OTP) ---  
   const handleMatchAction = async (action, resultId, data = {}) => {
     setActionLoading(prev => ({ ...prev, [resultId]: true }));
     try {
@@ -151,13 +165,13 @@ const ResultsPage = () => {
           response = await axios.patch(`${API_BASE_URL}/${resultId}/reject`, {}, { withCredentials: true });
           updateMatchInState(response.data);
           break;
-        case 'generate-code': 
+        case 'generate-code': // Changed from generate-token
           response = await axios.post(`${API_BASE_URL}/${resultId}/generate-code`, {}, { withCredentials: true });
           const match = matches.find(m => m._id === resultId);
           const itemTitle = match?.lostQuery?.objectName || match?.foundQuery?.objectName;
           setTransferCodeInfo({ code: response.data.transferCode, title: itemTitle });
           break;
-        case 'verify-code': 
+        case 'verify-code': // Changed from verify-token
           response = await axios.post(`${API_BASE_URL}/${resultId}/verify-code`, { code: data.code }, { withCredentials: true });
           updateMatchInState(response.data.match);
           setAlertInfo({ message: 'Transfer completed successfully!', type: 'success' });
@@ -185,7 +199,10 @@ const ResultsPage = () => {
       },
       onCancel: () => setVerifyModalInfo(null)
     });
-  }
+  }
+
+
+  // --- UI Logic ---
   const openFullscreen = (imageUrl) => {
     setFullscreenImage(imageUrl);
     document.body.style.overflow = 'hidden';
