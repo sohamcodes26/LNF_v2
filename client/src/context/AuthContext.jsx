@@ -1,13 +1,16 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import axios from 'axios';
+import axios from 'axios';
+
 axios.defaults.withCredentials = true;
 
-const AuthContext = createContext(null);
+const AuthContext = createContext(null);
+
 const API_URL = 'http://localhost:8000/apis/lost-and-found/auth';
 
 export const AuthProvider = ({ children }) => {
   const [authState, setAuthState] = useState('loading'); 
-  const [userEmail, setUserEmail] = useState(null);
+  const [userEmail, setUserEmail] = useState(null);
+
   useEffect(() => {
     const validateUser = async () => {
       try {
@@ -20,7 +23,8 @@ export const AuthProvider = ({ children }) => {
     validateUser();
   }, []);
 
-  const signup = async (fullName, email, password) => {
+  const signup = async (fullName, email, password) => {
+
     await axios.post(`${API_URL}/signup`, { email, password, fullName });
     setUserEmail(email);
     setAuthState('pending-verification');
