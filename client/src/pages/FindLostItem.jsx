@@ -32,7 +32,7 @@ const synonymMap = [
   { name: "umbrella", synonyms: ["rainshade", "parasol", "raincover"] },
   { name: "helmet", synonyms: ["bikehelmet", "safetyhelmet", "headgear"] },
   { name: "cap", synonyms: ["hat", "baseballcap", "headcover", "visor"] },
-  { name: "tiffin", synonyms: ["lunchbox", "dabba", "container", "lunchcase"] },
+  { name: "container", synonyms: ["lunchbox", "dabba", "tiffin","basket", "lunchcase"] },
   { name: "shoes", synonyms: ["footwear", "sneakers", "trainers", "sportswear", "loafers"] },
   { name: "slippers", synonyms: ["flipflops", "sandals", "chappals", "slides"] },
   { name: "simcard", synonyms: ["sim", "networkcard", "telecomchip"] },

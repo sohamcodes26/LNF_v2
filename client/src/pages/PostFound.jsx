@@ -31,7 +31,7 @@ const synonymMap = [
   { name: "umbrella", synonyms: ["rainshade", "parasol", "raincover"] },
   { name: "helmet", synonyms: ["bikehelmet", "safetyhelmet", "headgear"] },
   { name: "cap", synonyms: ["hat", "baseballcap", "headcover", "visor"] },
-  { name: "tiffin", synonyms: ["lunchbox", "dabba", "container", "lunchcase"] },
+  { name: "container", synonyms: ["lunchbox", "dabba", "tiffin","basket", "lunchcase"] },
   { name: "shoes", synonyms: ["footwear", "sneakers", "trainers", "sportswear", "loafers"] },
   { name: "slippers", synonyms: ["flipflops", "sandals", "chappals", "slides"] },
   { name: "simcard", synonyms: ["sim", "networkcard", "telecomchip"] },
@@ -91,7 +91,7 @@ const PostFoundPage = () => {
   const handleTitleChange = (e) => {
     const value = e.target.value;
     setItemTitle(value);
-    setSubmitted(false); // Reset submitted state when user types again
+    setSubmitted(false); // Reset submitted 
 
     if (value.length > 0) {
       const matches = allSynonyms.filter((syn) =>
@@ -231,16 +231,14 @@ const PostFoundPage = () => {
                 <input id="date-found" type="date" value={dateFound} onChange={(e) => { setDateFound(e.target.value); setSubmitted(false); }} className="w-full px-4 py-2 text-gray-800 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required />
               </div>
               
-              {/* --- CORRECTED CODE BLOCK START --- */}
-
-              {/* This message will now appear above the button only when 'submitted' is true */}
+             
               {submitted && (
                 <p className="text-green-600 font-semibold text-center mb-4">
                   ✅ Found item posted successfully!
                 </p>
               )}
 
-              {/* The button is no longer replaced and its state is only controlled by 'isLoading' */}
+             
               <Button type="submit" variant="cta" disabled={isLoading}>
                 {isLoading ? (
                   <>
@@ -255,7 +253,6 @@ const PostFoundPage = () => {
                 )}
               </Button>
               
-              {/* --- CORRECTED CODE BLOCK END --- */}
               
             </form>
           </div>

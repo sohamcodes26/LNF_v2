@@ -45,25 +45,23 @@ export const reportLostItem = async (req, res) => {
         await newLostItem.save();
         console.log(`Saved new lost item with ID: ${newLostItem._id}`);
 
-
         const threeDaysBeforeLost = new Date(newLostItem.dateLost);
         threeDaysBeforeLost.setDate(threeDaysBeforeLost.getDate() - 3);
 
         const searchFilter = {
+            status: 'not_resolved',
             canonicalLabel: newLostItem.canonicalLabel,
             dateFound: { $gte: threeDaysBeforeLost }, 
             $or: [
                 { locationFound: newLostItem.locationLost },
-                { locationFound: "No Idea" },
+                { locationFound: "Campus" },
             ]
         };
-        if (newLostItem.locationLost === "No Idea") {
+        if (newLostItem.locationLost === "Campus") {
             delete searchFilter.$or;
         }
 
-
         const itemsToSearch = await FoundItem.find(searchFilter).lean();
-        console.log(itemsToSearch);
         
         let matches = [];
         if (itemsToSearch.length > 0 && newLostItem.canonicalLabel && newLostItem.shape_features) {
@@ -72,22 +70,30 @@ export const reportLostItem = async (req, res) => {
                 matches = matchResult.matches;
 
                 if (matches.length > 0) {
-                    const resultsToSave = matches.map(match => {
-                        const foundItem = itemsToSearch.find(item => item._id.toString() === match._id);
-                        return {
-                            lostQuery: newLostItem._id,
-                            foundQuery: match._id,
-                            lostItemOwner: newLostItem.userId,
-                            foundItemHolder: foundItem.userId,
-                            matchConfidence: match.score
-                        };
-                    });
-                    await Result.insertMany(resultsToSave, { ordered: false }).catch(err => {
-                        if (err.code !== 11000) {
-                            console.error("Error saving match results:", err);
-                        }
-                    });
-                    console.log(`Saved ${resultsToSave.length} new match results.`);
+                    const resultsToSave = matches
+                        .filter(match => {
+                            const foundItem = itemsToSearch.find(item => item._id.toString() === match._id);
+                            return newLostItem.userId.toString() !== foundItem.userId.toString();
+                        })
+                        .map(match => {
+                            const foundItem = itemsToSearch.find(item => item._id.toString() === match._id);
+                            return {
+                                lostQuery: newLostItem._id,
+                                foundQuery: match._id,
+                                lostItemOwner: newLostItem.userId,
+                                foundItemHolder: foundItem.userId,
+                                matchConfidence: match.score
+                            };
+                        });
+                    
+                    if (resultsToSave.length > 0) {
+                        await Result.insertMany(resultsToSave, { ordered: false }).catch(err => {
+                            if (err.code !== 11000) {
+                                console.error("Error saving match results:", err);
+                            }
+                        });
+                        console.log(`Saved ${resultsToSave.length} new match results.`);
+                    }
                 }
             }
         }
@@ -147,20 +153,19 @@ export const reportFoundItem = async (req, res) => {
         await newFoundItem.save();
         console.log(`Saved new found item with ID: ${newFoundItem._id}`);
 
-
         const threeDaysAfterFound = new Date(newFoundItem.dateFound);
         threeDaysAfterFound.setDate(threeDaysAfterFound.getDate() + 3);
 
         const searchFilter = {
+            status: 'not_resolved',
             canonicalLabel: newFoundItem.canonicalLabel,
             dateLost: { $lte: threeDaysAfterFound }, 
             $or: [
                 { locationLost: newFoundItem.locationFound },
-                { locationLost: "No Idea" },
+                { locationLost: "Campus" },
             ]
         };
         
-
         const itemsToSearch = await LostItem.find(searchFilter).lean();
         
         if (itemsToSearch.length > 0) {
@@ -169,22 +174,30 @@ export const reportFoundItem = async (req, res) => {
                 const matches = matchResult.matches;
                 console.log(`Found ${matches.length} potential matches for the newly found item.`);
 
-                const resultsToSave = matches.map(match => {
-                    const lostItem = itemsToSearch.find(item => item._id.toString() === match._id);
-                    return {
-                        lostQuery: match._id,
-                        foundQuery: newFoundItem._id,
-                        lostItemOwner: lostItem.userId,
-                        foundItemHolder: newFoundItem.userId,
-                        matchConfidence: match.score
-                    };
-                });
-                await Result.insertMany(resultsToSave, { ordered: false }).catch(err => {
-                    if (err.code !== 11000) {
-                        console.error("Error saving match results:", err);
-                    }
-                });
-                console.log(`Saved ${resultsToSave.length} new match results.`);
+                const resultsToSave = matches
+                    .filter(match => {
+                        const lostItem = itemsToSearch.find(item => item._id.toString() === match._id);
+                        return newFoundItem.userId.toString() !== lostItem.userId.toString();
+                    })
+                    .map(match => {
+                        const lostItem = itemsToSearch.find(item => item._id.toString() === match._id);
+                        return {
+                            lostQuery: match._id,
+                            foundQuery: newFoundItem._id,
+                            lostItemOwner: lostItem.userId,
+                            foundItemHolder: newFoundItem.userId,
+                            matchConfidence: match.score
+                        };
+                    });
+
+                if (resultsToSave.length > 0) {
+                    await Result.insertMany(resultsToSave, { ordered: false }).catch(err => {
+                        if (err.code !== 11000) {
+                            console.error("Error saving match results:", err);
+                        }
+                    });
+                    console.log(`Saved ${resultsToSave.length} new match results.`);
+                }
             }
         }
 
