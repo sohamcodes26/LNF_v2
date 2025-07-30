@@ -1,10 +1,10 @@
-
-import React,{ useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 import { Send, X, Loader } from 'lucide-react';
-import axios from 'axios'; 
+import axios from 'axios';
 
-const socket = io('http://localhost:8000', { 
+// Initialize socket connection
+const socket = io('http://localhost:8000', {
     withCredentials: true
 });
 
@@ -16,25 +16,34 @@ const ChatModal = ({ currentUserId, chatPartner, onClose }) => {
     const [error, setError] = useState(null);
     const messagesEndRef = useRef(null);
 
+    // Helper function to scroll to the latest message
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
+    // Effect for establishing the chat room and fetching initial history
     useEffect(() => {
         const establishChatRoom = async () => {
             setIsLoading(true);
             setError(null);
+            
+            // --- CORRECTED LOGIC START ---
             try {
+                // This API call now always returns a roomId on success (status 200 or 201).
+                // It no longer throws a 409 error.
                 const response = await axios.post(
-                    'http://localhost:8000/apis/lost-and-found/chat/room', 
+                    'http://localhost:8000/apis/lost-and-found/chat/room',
                     { otherUserId: chatPartner.id },
                     { withCredentials: true }
                 );
+
                 const fetchedRoomId = response.data.roomId;
                 setRoomId(fetchedRoomId);
 
+                // Join the socket room to listen for live messages
                 socket.emit('joinRoom', fetchedRoomId);
 
+                // Once the room is established, fetch the chat history
                 const historyResponse = await axios.get(
                     `http://localhost:8000/apis/lost-and-found/chat/history/${fetchedRoomId}`,
                     { withCredentials: true }
@@ -42,35 +51,35 @@ const ChatModal = ({ currentUserId, chatPartner, onClose }) => {
                 setMessages(historyResponse.data);
 
             } catch (err) {
+                // This catch block now only handles genuine server errors (e.g., status 500)
                 console.error('Error establishing chat room or fetching history:', err);
-                setError('No messages yet.');
+                setError('Could not load chat. Please try again later.');
             } finally {
                 setIsLoading(false);
             }
+            // --- CORRECTED LOGIC END ---
         };
 
         if (currentUserId && chatPartner && chatPartner.id) {
             establishChatRoom();
         }
 
+        // Cleanup function to leave the socket room when the modal is closed or chat partner changes
         return () => {
-            setMessages([]);
+            if (roomId) {
+                socket.emit('leaveRoom', roomId);
+            }
         };
-    }, [currentUserId, chatPartner]);
+    }, [currentUserId, chatPartner, roomId]); // Added roomId to dependencies for the cleanup function
 
+    // Effect for handling incoming new messages from the socket
     useEffect(() => {
         const handleNewMessage = (newMessage) => {
-
-
-            const senderIdFromSocket = newMessage.sender?._id || newMessage.sender;
-
+            // Ensure the message belongs to the current open chat room
             if (newMessage.chatRoom === roomId) {
                 setMessages((prevMessages) => {
-
-
-                    const isDuplicate = prevMessages.some(
-                        (msg) => msg._id === newMessage._id
-                    );
+                    // Prevent duplicate messages from being added to the state
+                    const isDuplicate = prevMessages.some(msg => msg._id === newMessage._id);
                     return isDuplicate ? prevMessages : [...prevMessages, newMessage];
                 });
             }
@@ -78,21 +87,23 @@ const ChatModal = ({ currentUserId, chatPartner, onClose }) => {
 
         socket.on('newMessage', handleNewMessage);
 
+        // Cleanup the event listener when the component unmounts or roomId changes
         return () => {
             socket.off('newMessage', handleNewMessage);
         };
-    }, [roomId]);
+    }, [roomId]); // This effect depends only on the roomId
 
+    // Effect to scroll down whenever the messages array is updated
     useEffect(() => {
         scrollToBottom();
     }, [messages]);
 
+    // Function to handle sending a new message
     const handleSendMessage = async () => {
         if (inputMessage.trim() && roomId) {
             try {
-
-
-
+                // The message is sent via API to be saved in the DB
+                // The server will then emit it via socket to the room
                 await axios.post(
                     'http://localhost:8000/apis/lost-and-found/chat/message',
                     { roomId, message: inputMessage.trim() },
@@ -101,13 +112,15 @@ const ChatModal = ({ currentUserId, chatPartner, onClose }) => {
                 setInputMessage('');
             } catch (err) {
                 console.error('Error sending message:', err);
-                setError('Failed to send message.');
+                setError('Failed to send message.'); // Optionally show a temporary error
             }
         }
     };
 
+    // Handle sending message on "Enter" key press
     const handleKeyPress = (event) => {
-        if (event.key === 'Enter') {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
             handleSendMessage();
         }
     };
@@ -127,7 +140,7 @@ const ChatModal = ({ currentUserId, chatPartner, onClose }) => {
                     </button>
                 </header>
 
-                {}
+                {/* Main Chat Body */}
                 <div className="flex-grow overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                     {isLoading ? (
                         <div className="flex items-center justify-center h-full text-gray-500">
@@ -135,9 +148,9 @@ const ChatModal = ({ currentUserId, chatPartner, onClose }) => {
                             <span>Loading Chat...</span>
                         </div>
                     ) : error ? (
-                            <div className="flex items-center justify-center h-full text-gray-500">
-                                <span>{error}</span>
-                            </div>
+                        <div className="flex items-center justify-center h-full text-gray-500">
+                            <span>{error}</span>
+                        </div>
                     ) : messages.length === 0 ? (
                         <p className="text-gray-400 text-center py-4">No messages yet. Say hello!</p>
                     ) : (
@@ -164,7 +177,7 @@ const ChatModal = ({ currentUserId, chatPartner, onClose }) => {
                     <div ref={messagesEndRef} />
                 </div>
 
-                {}
+                {/* Chat Input Footer */}
                 <footer className="p-4 border-t border-gray-200">
                     <div className="flex items-center space-x-2">
                         <input

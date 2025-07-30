@@ -291,7 +291,7 @@ const handleSuggestionClick = (value) => {
 
               <Button type="submit" variant="primary" disabled={loading}>
                 <Search className="w-5 h-5" />
-                {loading ? 'Reporting...(You can close this page)' : 'Report Lost Item'}
+                {loading ? 'Reporting...(Do not close this page)' : 'Report Lost Item'}
               </Button>
             </form>
           </div>

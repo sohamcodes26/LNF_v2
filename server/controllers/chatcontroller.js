@@ -1,37 +1,48 @@
 import { ChatRoom, ChatMessage } from '../schema/chatschema.js';
 import mongoose from 'mongoose';
 
+// In your chat controller file
+
 export const getOrCreateChatRoom = async (req, res) => {
     const currentUserId = req.id;
     const { otherUserId } = req.body;
 
-    if (!otherUserId) {
-        return res.status(400).json({ message: 'otherUserId is required.' });
+    if (!otherUserId || currentUserId === otherUserId) {
+        return res.status(400).json({ message: 'Valid otherUserId is required.' });
     }
 
-    if (currentUserId === otherUserId) {
-        return res.status(400).json({ message: 'Cannot create a chat room with yourself.' });
-    }
-
-    const sortedUsers = [currentUserId, otherUserId]
-        .map(id => new mongoose.Types.ObjectId(id))
-        .sort((a, b) => a.toString().localeCompare(b.toString()));
+    // Sort the user IDs to ensure consistency
+    // The smaller ID will always be user1, the larger will be user2
+    const user1 = currentUserId < otherUserId ? currentUserId : otherUserId;
+    const user2 = currentUserId > otherUserId ? currentUserId : otherUserId;
 
     try {
-        let room = await ChatRoom.findOne({ users: sortedUsers });
+        // Find a room where user1 and user2 match the sorted IDs
+        let room = await ChatRoom.findOne({ user1, user2 });
 
+        // If the room doesn't exist, create it
         if (!room) {
-            room = new ChatRoom({ users: sortedUsers });
+            room = new ChatRoom({ user1, user2 });
             await room.save();
+            return res.status(201).json({ roomId: room._id });
         }
 
-        res.status(200).json({ roomId: room._id });
+        // If the room already exists, return its ID
+        return res.status(200).json({ roomId: room._id });
 
     } catch (error) {
+        // This will now correctly catch race conditions thanks to the compound index
+        if (error.code === 11000) {
+           // In case of a race condition, re-fetch the room to be safe
+           const existingRoom = await ChatRoom.findOne({ user1, user2 });
+           return res.status(200).json({ roomId: existingRoom._id });
+        }
         console.error('Error in getOrCreateChatRoom:', error);
         res.status(500).json({ message: 'Server error while getting or creating chat room.' });
     }
 };
+
+// In your chat controller file
 
 export const sendMessage = async (req, res) => {
     const senderId = req.id;
@@ -47,15 +58,13 @@ export const sendMessage = async (req, res) => {
             return res.status(404).json({ message: 'Chat room not found.' });
         }
 
-        if (!room.users.map(id => id.toString()).includes(senderId)) {
+        // **CORRECTED LOGIC**: Check if senderId is either user1 or user2
+        if (room.user1.toString() !== senderId && room.user2.toString() !== senderId) {
             return res.status(403).json({ message: 'Sender is not a member of this chat room.' });
         }
 
-        const receiverId = room.users.find(id => id.toString() !== senderId);
-        if (!receiverId) {
-            console.error(`Could not find a receiver in room ${roomId} for sender ${senderId}`);
-            return res.status(500).json({ message: 'Internal server error: Chat room is invalid.' });
-        }
+        // **CORRECTED LOGIC**: Find the receiverId
+        const receiverId = senderId === room.user1.toString() ? room.user2 : room.user1;
 
         const chatMessage = new ChatMessage({
             chatRoom: roomId,
@@ -65,10 +74,10 @@ export const sendMessage = async (req, res) => {
         });
         await chatMessage.save();
         
-        const populatedMessage = await chatMessage.populate('sender', 'email name'); 
+        const populatedMessage = await chatMessage.populate('sender', 'email name');
 
         const io = req.app.get('socketio');
-        io.to(roomId).emit('newMessage', populatedMessage);
+        io.to(roomId.toString()).emit('newMessage', populatedMessage); // Use roomId.toString() for socket.io rooms
 
         res.status(201).json(populatedMessage);
 
@@ -78,27 +87,32 @@ export const sendMessage = async (req, res) => {
     }
 };
 
+// In your chat controller file
+
 export const getChatHistory = async (req, res) => {
     const userId = req.id;
     const { roomId } = req.params;
 
     try {
         if (!mongoose.Types.ObjectId.isValid(roomId)) {
-             return res.status(400).json({ message: 'Invalid roomId format.' });
+            return res.status(400).json({ message: 'Invalid roomId format.' });
         }
 
         const room = await ChatRoom.findById(roomId);
         if (!room) {
             return res.status(404).json({ message: 'Chat room not found.' });
         }
-        if (!room.users.map(id => id.toString()).includes(userId)) {
+        
+        // **CORRECTED LOGIC**: Check if userId is either user1 or user2
+        if (room.user1.toString() !== userId && room.user2.toString() !== userId) {
             return res.status(403).json({ message: 'You are not a member of this chat room.' });
         }
 
         const messages = await ChatMessage.find({ chatRoom: roomId })
             .sort({ createdAt: 1 })
-            .populate('sender'); 
+            .populate('sender', 'email name'); // Populating with name and email
 
+        // Mark messages as read (your existing logic is fine)
         ChatMessage.updateMany(
             { chatRoom: roomId, receiver: userId, read: false },
             { $set: { read: true } }

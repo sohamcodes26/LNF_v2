@@ -1,6 +1,6 @@
 import Result from '../schema/resultschema.js'; 
 import mongoose from 'mongoose';
-
+import { LostItem, FoundItem } from '../schema/objectqueryschema.js'; 
 
 export const getMyMatches = async (req, res) => {
     const userId = req.id;
@@ -9,9 +9,9 @@ export const getMyMatches = async (req, res) => {
         const matches = await Result.find({
             $or: [{ lostItemOwner: userId }, { foundItemHolder: userId }]
         })
-        // Add dateLost to the list of fields
+        
         .populate('lostQuery', 'objectName objectDescription objectImage dateLost')
-        // Add dateFound to the list of fields
+        
         .populate('foundQuery', 'objectName objectDescription objectImage dateFound')
         .populate('lostItemOwner', 'name email')
         .populate('foundItemHolder', 'name email')
@@ -128,6 +128,7 @@ export const generateTransferCode = async (req, res) => {
 };
 
 
+
 export const verifyTransferCode = async (req, res) => {
     const { resultId } = req.params;
     const userId = req.id;
@@ -152,11 +153,19 @@ export const verifyTransferCode = async (req, res) => {
             return res.status(400).json({ message: 'Invalid or expired transfer code.' });
         }
 
+        
         match.status = 'transfer_complete';
-        match.transferCode = null; 
-        await match.save();
+        match.transferCode = null;
 
-        res.status(200).json({ message: 'Transfer complete!', match });
+ 
+        await Promise.all([
+            LostItem.findByIdAndUpdate(match.lostQuery, { status: 'resolved' }),
+            FoundItem.findByIdAndUpdate(match.foundQuery, { status: 'resolved' }),
+            match.save()
+        ]);
+        
+
+        res.status(200).json({ message: 'Transfer complete! The items are now marked as resolved.', match });
 
     } catch (error) {
         console.error('Error verifying transfer code:', error);

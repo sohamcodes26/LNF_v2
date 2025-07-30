@@ -8,10 +8,8 @@ import walletImage from '../assets/finalbottle.jpg';
 import calculatorImage from '../assets/calculator.jpg';
 import bottleImage from '../assets/ring.jpg';
 
-
 const synonymMap = [
   { name: "box", synonyms: ["cardboard", "carton", "rectangular box", "package"] },
-
   { name: "spectacles", synonyms: ["glasses", "eyewear", "goggles", "frames", "lenses"] },
   { name: "bottle", synonyms: ["waterbottle", "flask", "sipper", "thermos", "hydrator"] },
   { name: "charger", synonyms: ["adapter", "powerbrick", "chargingcable", "usbcharger", "wallcharger"] },
@@ -81,35 +79,35 @@ const PostFoundPage = () => {
   const [suggestions, setSuggestions] = useState([]);
 
   const resolveCanonicalName = (input) => {
-  const lowerInput = input.toLowerCase();
-  for (let entry of synonymMap) {
-    if (entry.name === lowerInput || entry.synonyms.includes(lowerInput)) {
-      return entry.name;
+    const lowerInput = input.toLowerCase();
+    for (let entry of synonymMap) {
+      if (entry.name === lowerInput || entry.synonyms.includes(lowerInput)) {
+        return entry.name;
+      }
     }
-  }
-  return input;
-};
+    return input;
+  };
 
-const handleTitleChange = (e) => {
-  const value = e.target.value;
-  setItemTitle(value);
+  const handleTitleChange = (e) => {
+    const value = e.target.value;
+    setItemTitle(value);
+    setSubmitted(false); // Reset submitted state when user types again
 
-  if (value.length > 0) {
-    const matches = allSynonyms.filter((syn) =>
-      syn.toLowerCase().startsWith(value.toLowerCase())
-    );
-    setSuggestions(matches.slice(0, 5));
-  } else {
+    if (value.length > 0) {
+      const matches = allSynonyms.filter((syn) =>
+        syn.toLowerCase().startsWith(value.toLowerCase())
+      );
+      setSuggestions(matches.slice(0, 5));
+    } else {
+      setSuggestions([]);
+    }
+  };
+
+  const handleSuggestionClick = (value) => {
+    const canonical = resolveCanonicalName(value);
+    setItemTitle(canonical);
     setSuggestions([]);
-  }
-};
-
-const handleSuggestionClick = (value) => {
-  const canonical = resolveCanonicalName(value);
-  setItemTitle(canonical);
-  setSuggestions([]);
-};
-
+  };
 
   const campusLocations = useMemo(() => {
     const generalLocations = ['Campus', 'Grounds'];
@@ -120,6 +118,7 @@ const handleSuggestionClick = (value) => {
   const handleImageUpload = (event) => {
     if (event.target.files && event.target.files[0]) {
       setSelectedImage(event.target.files[0]);
+      setSubmitted(false); // Reset submitted state on new image
     }
   };
 
@@ -173,30 +172,30 @@ const handleSuggestionClick = (value) => {
 
             <form onSubmit={handleFormSubmit} className="space-y-4">
               <div className="relative">
-  <Label htmlFor="item-title">Object Type / Title</Label>
-  <input
-    id="item-title"
-    type="text"
-    value={itemTitle}
-    onChange={handleTitleChange}
-    placeholder="e.g., iPhone 14 Pro, Blue Backpack"
-    className="w-full px-4 py-2 text-gray-800 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-    required
-  />
-  {suggestions.length > 0 && (
-    <ul className="absolute z-10 bg-white border border-gray-200 w-full mt-1 rounded-lg shadow-md max-h-40 overflow-y-auto">
-      {suggestions.map((suggestion, index) => (
-        <li
-          key={index}
-          onClick={() => handleSuggestionClick(suggestion)}
-          className="px-4 py-2 cursor-pointer hover:bg-blue-50 text-sm text-gray-700"
-        >
-          {suggestion}
-        </li>
-      ))}
-    </ul>
-  )}
-</div>
+                <Label htmlFor="item-title">Object Type / Title</Label>
+                <input
+                  id="item-title"
+                  type="text"
+                  value={itemTitle}
+                  onChange={handleTitleChange}
+                  placeholder="e.g., iPhone 14 Pro, Blue Backpack"
+                  className="w-full px-4 py-2 text-gray-800 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  required
+                />
+                {suggestions.length > 0 && (
+                  <ul className="absolute z-10 bg-white border border-gray-200 w-full mt-1 rounded-lg shadow-md max-h-40 overflow-y-auto">
+                    {suggestions.map((suggestion, index) => (
+                      <li
+                        key={index}
+                        onClick={() => handleSuggestionClick(suggestion)}
+                        className="px-4 py-2 cursor-pointer hover:bg-blue-50 text-sm text-gray-700"
+                      >
+                        {suggestion}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
 
               <div>
                 <Label htmlFor="image-upload">Upload Image</Label>
@@ -208,7 +207,7 @@ const handleSuggestionClick = (value) => {
 
               <div>
                 <Label htmlFor="item-description">Item Description</Label>
-                <textarea id="item-description" rows={3} value={itemDescription} onChange={(e) => setItemDescription(e.target.value)} placeholder="Describe the item: color, brand, any unique features..." className="w-full px-4 py-2 text-gray-800 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required />
+                <textarea id="item-description" rows={3} value={itemDescription} onChange={(e) => { setItemDescription(e.target.value); setSubmitted(false); }} placeholder="Describe the item: color, brand, any unique features..." className="w-full px-4 py-2 text-gray-800 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required />
               </div>
 
               <div>
@@ -216,7 +215,7 @@ const handleSuggestionClick = (value) => {
                 <select
                   id="location-found"
                   value={locationFound}
-                  onChange={(e) => setLocationFound(e.target.value)}
+                  onChange={(e) => { setLocationFound(e.target.value); setSubmitted(false); }}
                   className="w-full px-4 py-2 text-gray-800 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
                   required
                 >
@@ -229,28 +228,35 @@ const handleSuggestionClick = (value) => {
 
               <div>
                 <Label htmlFor="date-found">Date Found</Label>
-                <input id="date-found" type="date" value={dateFound} onChange={(e) => setDateFound(e.target.value)} className="w-full px-4 py-2 text-gray-800 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required />
+                <input id="date-found" type="date" value={dateFound} onChange={(e) => { setDateFound(e.target.value); setSubmitted(false); }} className="w-full px-4 py-2 text-gray-800 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" required />
               </div>
+              
+              {/* --- CORRECTED CODE BLOCK START --- */}
 
-              {!submitted ? (
-                <Button type="submit" variant="cta" disabled={isLoading}>
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                      Posting...(You can close this page.)
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle className="w-5 h-5" />
-                      Post Found Item
-                    </>
-                  )}
-                </Button>
-              ) : (
-                <p className="text-green-600 font-semibold text-center mt-4">
+              {/* This message will now appear above the button only when 'submitted' is true */}
+              {submitted && (
+                <p className="text-green-600 font-semibold text-center mb-4">
                   ✅ Found item posted successfully!
                 </p>
               )}
+
+              {/* The button is no longer replaced and its state is only controlled by 'isLoading' */}
+              <Button type="submit" variant="cta" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    Posting...(Do not close this page)
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-5 h-5" />
+                    Post Found Item
+                  </>
+                )}
+              </Button>
+              
+              {/* --- CORRECTED CODE BLOCK END --- */}
+              
             </form>
           </div>
         </div>
@@ -269,9 +275,8 @@ const handleSuggestionClick = (value) => {
           </ul>
 
 
- 
-          <div className="mb-6 mt-4"> 
-            <h3 className="text-xl font-bold text-gray-800">Reference Images</h3> 
+          <div className="mb-6 mt-4">
+            <h3 className="text-xl font-bold text-gray-800">Reference Images</h3>
             <p className="text-gray-600 text-sm mt-2">
               Examples of clear images for effective posting.
             </p>
@@ -299,7 +304,7 @@ const handleSuggestionClick = (value) => {
               />
             </div>
           </div>
-        
+
         </div>
       </div>
     </main>

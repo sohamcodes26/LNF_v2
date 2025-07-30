@@ -1,26 +1,27 @@
-
-
 import mongoose from 'mongoose';
 const { Schema } = mongoose;
 
+
 const chatRoomSchema = new Schema({
-    users: {
-        type: [{
-            type: Schema.Types.ObjectId,
-            ref: 'userlogin'
-        }],
-        required: true,
-        validate: [
-            (val) => val.length === 2,
-            'A chat room must have exactly two users.'
-        ]
+    
+    user1: {
+        type: Schema.Types.ObjectId,
+        ref: 'userlogin',
+        required: true
+    },
+    user2: {
+        type: Schema.Types.ObjectId,
+        ref: 'userlogin',
+        required: true
     }
 }, {
     timestamps: true
-});
-chatRoomSchema.index({ users: 1 }, { unique: true });
+});
 
-const chatMessageSchema = new Schema({
+chatRoomSchema.index({ user1: 1, user2: 1 }, { unique: true });
+
+
+const chatMessageSchema = new Schema({
     chatRoom: {
         type: Schema.Types.ObjectId,
         ref: 'ChatRoom',
@@ -49,7 +50,6 @@ const chatMessageSchema = new Schema({
 }, {
     timestamps: true
 });
-
 
 const ChatRoom = mongoose.model('ChatRoom', chatRoomSchema);
 const ChatMessage = mongoose.model('ChatMessage', chatMessageSchema);
