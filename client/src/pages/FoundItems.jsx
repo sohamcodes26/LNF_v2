@@ -27,7 +27,7 @@ const FoundItems = () => {
 
       try {
         const response = await axios.get(
-          "http://localhost:8000/apis/lost-and-found/my-items/my-found-items",
+          "https://lnf-render.onrender.com/apis/lost-and-found/my-items/my-found-items",
           config
         );
         setFoundItems(response.data.foundItems);

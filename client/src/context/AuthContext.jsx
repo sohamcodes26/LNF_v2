@@ -5,7 +5,7 @@ axios.defaults.withCredentials = true;
 
 const AuthContext = createContext(null);
 
-const API_URL = 'http://localhost:8000/apis/lost-and-found/auth';
+const API_URL = 'https://lnf-render.onrender.com/apis/lost-and-found/auth';
 
 export const AuthProvider = ({ children }) => {
   const [authState, setAuthState] = useState('loading'); 

@@ -8,12 +8,25 @@ const MyAccount = () => {
   const [error, setError] = useState('');
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const [passwordMessage, setPasswordMessage] = useState('');
+  const [passwordMessage, setPasswordMessage] = useState('');
+
   useEffect(() => {
-    const fetchProfile = async () => {
-      const token = localStorage.getItem('token'); 
+    const fetchProfile = async () => {
+
+
+
+
+      const token = localStorage.getItem('token'); 
+
+
+
+
+https://lnf-render.onrender.com
       const config = {
-        headers: {
+        headers: {
+
+
+
         },
         withCredentials: true 
       };
@@ -25,9 +38,12 @@ const MyAccount = () => {
         setProfile(res.data);
         setError(''); 
       } catch (err) {
-        console.error("Error fetching profile:", err);
+        console.error("Error fetching profile:", err);
+
         if (err.response && (err.response.status === 401 || err.response.status === 403)) {
-            setError('Session expired or not authenticated. Please log in again.');
+            setError('Session expired or not authenticated. Please log in again.');
+
+
         } else {
             setError(err.response?.data?.message || 'Failed to load profile. Please try again.');
         }
@@ -37,14 +53,15 @@ const MyAccount = () => {
     };
 
     fetchProfile();
-  }, []);
+  }, []);
+
   const handleChangePassword = async (e) => {
     e.preventDefault();
     setPasswordMessage(''); 
 
     if (!oldPassword || !newPassword) {
       setPasswordMessage('Both password fields are required.');
-      return;
+      rethttps://lnf-render.onrender.com
     }
 
     if (oldPassword === newPassword) {
@@ -54,7 +71,9 @@ const MyAccount = () => {
 
     const token = localStorage.getItem('token');
     const config = {
-      headers: {
+      headers: {
+
+
       },
       withCredentials: true 
     };

@@ -27,7 +27,7 @@ const ReceivedItems = () => {
 
       try {
         const response = await axios.get(
-          "http://localhost:8000/apis/lost-and-found/my-items/my-lost-items",
+          "https://lnf-render.onrender.com/apis/lost-and-found/my-items/my-lost-items",
           config
         );
 
