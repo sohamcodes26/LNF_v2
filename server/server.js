@@ -26,9 +26,15 @@ const app = express();
 const server = http.createServer(app);
 const port = process.env.PORT || 9000;
 
+// --- CORS SETTINGS: CHANGE THIS BLOCK ---
+const allowedOrigins = [
+    'http://localhost:5173', // for local development
+    'https://lnf-render-ccad4qa3v-soham-koltes-projects-165258af.vercel.app' // your Vercel frontend
+];
+
 const io = new Server(server, {
     cors: {
-        origin: 'http://localhost:5173',
+        origin: allowedOrigins,
         methods: ['GET', 'POST'],
         credentials: true
     }
@@ -37,17 +43,16 @@ const io = new Server(server, {
 app.set('socketio', io);
 
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: allowedOrigins,
     methods: ['GET', 'POST', 'OPTIONS', 'PATCH', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
 }));
+// --- END CORS SETTINGS ---
 
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-
-
 
 connectdb();
 
@@ -74,7 +79,6 @@ io.on('connection', (socket) => {
 app.get('/', (req, res) => {
   res.send('Lost and Found Backend is running ✅');
 });
-
 
 server.listen(port, () => {
     console.log(`Server is running on port ${port}`);
