@@ -67,7 +67,8 @@ export const sign_up = async (req, res) => {
                 }
             );
             return res.status(202).json({ message: 'OTP Verification Restarted. New OTP sent.' });
-        }
+        }
+
         await temp_otp.create({
             fullName: details.fullName,
             email: details.email,
@@ -99,12 +100,14 @@ export const otp_verification = async (req, res) => {
             return res.status(status.code).json({ message: status.message });
         }
 
-        const hashedpass = tempUser.user_password;
+        const hashedpass = tempUser.user_password;
+
         const newUser = await userlogin.create({
             fullName: tempUser.fullName, 
             email: details.email,
             user_password: hashedpass,
-        });
+        });
+
         await temp_otp.deleteOne({ email: details.email });
 
         const token = generate_token(newUser);
@@ -163,7 +166,13 @@ export const validate = async (req, res) => {
 
 export const signout = async (req, res) => {
     try {
-        res.status(200).clearCookie('token').json({ message: 'Sign Out successful' });
+        
+        res.status(200).clearCookie('token', {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'None',
+            path: '/' 
+        }).json({ message: 'Sign Out successful' });
     } catch (err) {
         console.error('Error during sign-out:', err);
         res.status(500).json({ message: 'Internal Server Error!' });
