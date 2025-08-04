@@ -66,6 +66,7 @@ const synonymMap = [
   { name: "gloves", synonyms: ["handgloves", "mittens", "ridinggloves"] },
   { name: "sunscreen", synonyms: ["sunblock", "uvlotion", "spfcream"] },
   { name: "folder", synonyms: ["file", "documentsleeve", "paperholder"] },
+  { name: "chain", synonyms: ["chain", "mangal sutra"] },
   { name: "projectfile", synonyms: ["report", "assignmentfile", "submissionfile"] }
 ];
 
