@@ -21,7 +21,7 @@ const MyAccount = () => {
 
 
 
-https://lnf-render.onrender.com
+
       const config = {
         headers: {
 
@@ -34,7 +34,7 @@ https://lnf-render.onrender.com
 
       try {
         setLoading(true); 
-        const res = await axios.get('http://localhost:8000/apis/lost-and-found/MyAccount/getprofile', config);
+        const res = await axios.get('https://lnf-render.onrender.com/apis/lost-and-found/MyAccount/getprofile', config);
         setProfile(res.data);
         setError(''); 
       } catch (err) {
@@ -61,7 +61,7 @@ https://lnf-render.onrender.com
 
     if (!oldPassword || !newPassword) {
       setPasswordMessage('Both password fields are required.');
-      rethttps://lnf-render.onrender.com
+      return;
     }
 
     if (oldPassword === newPassword) {
@@ -80,7 +80,7 @@ https://lnf-render.onrender.com
 
     try {
       const res = await axios.post(
-        'http://localhost:8000/apis/lost-and-found/MyAccount/change-password',
+        'https://lnf-render.onrender.com/apis/lost-and-found/MyAccount/change-password',
         { oldPassword, newPassword },
         config
       );
