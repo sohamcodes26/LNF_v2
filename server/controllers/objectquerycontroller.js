@@ -1,213 +1,123 @@
-import { LostItem, FoundItem } from '../schema/objectqueryschema.js';
+import { Item } from '../schema/objectqueryschema.js';
 import Result from '../schema/resultschema.js'; 
 import { processItemFeatures, findMatches } from '../services/ai_service.js';
-import { uploadCareImage } from '../middlewares/uploadcareUpload.js';
 
-export const reportLostItem = async (req, res) => {
+// Consolidated controller for both lost and found items
+export const reportItem = async (req, res) => {
     try {
-        const { objectName, objectDescription, locationLost, dateLost } = req.body;
+        // --- 1. Extract and Validate New Data Structure ---
+        const {
+            itemType, // 'lost' or 'found'
+            objectName, brand, material, size, markings, colors,
+            location, date
+        } = req.body;
         const userId = req.id;
 
-        if (!objectName || !objectDescription || !locationLost || !dateLost) {
-            return res.status(400).json({ message: 'Missing required fields for lost item.' });
+        // Basic validation
+        if (!itemType || !objectName || !location || !date) {
+            return res.status(400).json({ message: 'Missing required fields.' });
+        }
+        if (itemType === 'found' && (!req.files || req.files.length < 3)) {
+             return res.status(400).json({ message: 'A minimum of 3 images are required for found items.' });
         }
 
-        const objectImageURL = req.file ? req.file.path : null; 
-        let newLostItem = new LostItem({
-            userId, 
-            objectName,
-            objectDescription,
-            objectImage: objectImageURL,
-            locationLost,
-            dateLost: new Date(dateLost)
-        });
+        // Handle multiple image URLs from middleware
+        const imageUrls = req.files ? req.files.map(file => file.path) : [];
 
+        // --- 2. Call AI Service with the Unified Payload ---
         const featuresPayload = {
-            objectName,
-            objectDescription,
-            objectImage: objectImageURL
+            objectName, brand, material, size, markings, colors,
+            images: imageUrls
         };
         
         const features = await processItemFeatures(featuresPayload);
-
-        if (features) {
-            newLostItem.canonicalLabel = features.canonicalLabel;
-            newLostItem.text_embedding = features.text_embedding;
-            if (features.shape_features) {
-                newLostItem.shape_features = features.shape_features;
-                newLostItem.color_features = features.color_features;
-                newLostItem.texture_features = features.texture_features;
-            }
-        } else {
+        if (!features) {
             return res.status(500).json({ message: 'Could not process item features via AI service.' });
         }
-        
-        await newLostItem.save();
-        console.log(`Saved new lost item with ID: ${newLostItem._id}`);
 
-        const threeDaysBeforeLost = new Date(newLostItem.dateLost);
-        threeDaysBeforeLost.setDate(threeDaysBeforeLost.getDate() - 3);
-
-        const searchFilter = {
-            status: 'not_resolved',
-            canonicalLabel: newLostItem.canonicalLabel,
-            dateFound: { $gte: threeDaysBeforeLost }, 
-            $or: [
-                { locationFound: newLostItem.locationLost },
-                { locationFound: "Campus" },
-            ]
-        };
-        if (newLostItem.locationLost === "Campus") {
-            delete searchFilter.$or;
-        }
-
-        const itemsToSearch = await FoundItem.find(searchFilter).lean();
-        
-        let matches = [];
-        if (itemsToSearch.length > 0 && newLostItem.canonicalLabel && newLostItem.shape_features) {
-            const matchResult = await findMatches(newLostItem.toObject(), itemsToSearch);
-            if (matchResult) {
-                matches = matchResult.matches;
-
-                if (matches.length > 0) {
-                    const resultsToSave = matches
-                        .filter(match => {
-                            const foundItem = itemsToSearch.find(item => item._id.toString() === match._id);
-                            return newLostItem.userId.toString() !== foundItem.userId.toString();
-                        })
-                        .map(match => {
-                            const foundItem = itemsToSearch.find(item => item._id.toString() === match._id);
-                            return {
-                                lostQuery: newLostItem._id,
-                                foundQuery: match._id,
-                                lostItemOwner: newLostItem.userId,
-                                foundItemHolder: foundItem.userId,
-                                matchConfidence: match.score
-                            };
-                        });
-                    
-                    if (resultsToSave.length > 0) {
-                        await Result.insertMany(resultsToSave, { ordered: false }).catch(err => {
-                            if (err.code !== 11000) {
-                                console.error("Error saving match results:", err);
-                            }
-                        });
-                        console.log(`Saved ${resultsToSave.length} new match results.`);
-                    }
-                }
-            }
-        }
-        
-        res.status(201).json({ 
-            message: 'Lost item reported successfully and search initiated.', 
-            item: newLostItem,
-            matches: matches
-        });
-
-    } catch (err) {
-        console.error('Error reporting lost item:', err);
-        res.status(500).json({ message: 'Internal Server Error while reporting lost item.' });
-    }
-};
-
-export const reportFoundItem = async (req, res) => {
-    try {
-        const { objectName, objectDescription, locationFound, dateFound } = req.body;
-        const userId = req.id;
-
-        if (!objectName || !objectDescription || !locationFound || !dateFound) {
-            return res.status(400).json({ message: 'Missing required fields for found item.' });
-        }
-
-        if (!req.file) {
-            return res.status(400).json({ message: 'Image is compulsory for found items.' });
-        }
-
-        const objectImageURL = req.file ? req.file.path : null;
-
-        let newFoundItem = new FoundItem({
+        // --- 3. Create and Save the New Item Document ---
+        const newItem = new Item({
             userId,
+            itemType,
             objectName,
-            objectDescription,
-            objectImage: objectImageURL,
-            locationFound,
-            dateFound: new Date(dateFound)
+            brand,
+            material,
+            size,
+            markings,
+            colors,
+            location,
+            date: new Date(date),
+            images: imageUrls,
+            // Populate AI features from the response
+            canonicalLabel: features.canonicalLabel,
+            brand_embedding: features.brand_embedding,
+            material_embedding: features.material_embedding,
+            markings_embedding: features.markings_embedding,
+            visual_features: features.visual_features
         });
+        
+        await newItem.save();
+        console.log(`Saved new ${itemType} item with ID: ${newItem._id}`);
 
-        const features = await processItemFeatures({ 
-            objectName, 
-            objectDescription, 
-            objectImage: objectImageURL
-        });
-
-        if (features) {
-            newFoundItem.canonicalLabel = features.canonicalLabel;
-            newFoundItem.text_embedding = features.text_embedding;
-            newFoundItem.shape_features = features.shape_features;
-            newFoundItem.color_features = features.color_features;
-            newFoundItem.texture_features = features.texture_features;
-        } else {
-            return res.status(500).json({ message: 'Could not process item features via AI service.' });
-        }
-
-        await newFoundItem.save();
-        console.log(`Saved new found item with ID: ${newFoundItem._id}`);
-
-        const threeDaysAfterFound = new Date(newFoundItem.dateFound);
-        threeDaysAfterFound.setDate(threeDaysAfterFound.getDate() + 3);
+        // --- 4. Perform Matching Logic ---
+        const isLostItemQuery = newItem.itemType === 'lost';
+        const searchItemType = isLostItemQuery ? 'found' : 'lost';
+        
+        // Define date and location search parameters based on the new item
+        const dateFilter = isLostItemQuery 
+            ? { date: { $gte: new Date(new Date(newItem.date).setDate(newItem.date.getDate() - 3)) } } // Found within 3 days prior
+            : { date: { $lte: new Date(new Date(newItem.date).setDate(newItem.date.getDate() + 3)) } }; // Lost within 3 days after
+        
+        const locationFilter = {
+            location: { $in: [newItem.location, "Campus"] }
+        };
 
         const searchFilter = {
+            itemType: searchItemType,
             status: 'not_resolved',
-            canonicalLabel: newFoundItem.canonicalLabel,
-            dateLost: { $lte: threeDaysAfterFound }, 
-            $or: [
-                { locationLost: newFoundItem.locationFound },
-                { locationLost: "Campus" },
-            ]
+            canonicalLabel: newItem.canonicalLabel,
+            ...dateFilter,
+            ...locationFilter
         };
-        
-        const itemsToSearch = await LostItem.find(searchFilter).lean();
+
+        const itemsToSearch = await Item.find(searchFilter).lean();
         
         if (itemsToSearch.length > 0) {
-            const matchResult = await findMatches(newFoundItem.toObject(), itemsToSearch);
+            const matchResult = await findMatches(newItem.toObject(), itemsToSearch);
             if (matchResult && matchResult.matches.length > 0) {
-                const matches = matchResult.matches;
-                console.log(`Found ${matches.length} potential matches for the newly found item.`);
-
-                const resultsToSave = matches
+                // (The logic to create and save Result documents remains largely the same)
+                const resultsToSave = matchResult.matches
                     .filter(match => {
-                        const lostItem = itemsToSearch.find(item => item._id.toString() === match._id);
-                        return newFoundItem.userId.toString() !== lostItem.userId.toString();
+                        const matchedItem = itemsToSearch.find(item => item._id.toString() === match._id);
+                        return newItem.userId.toString() !== matchedItem.userId.toString();
                     })
                     .map(match => {
-                        const lostItem = itemsToSearch.find(item => item._id.toString() === match._id);
+                        const matchedItem = itemsToSearch.find(item => item._id.toString() === match._id);
                         return {
-                            lostQuery: match._id,
-                            foundQuery: newFoundItem._id,
-                            lostItemOwner: lostItem.userId,
-                            foundItemHolder: newFoundItem.userId,
+                            lostQuery: isLostItemQuery ? newItem._id : matchedItem._id,
+                            foundQuery: isLostItemQuery ? matchedItem._id : newItem._id,
+                            lostItemOwner: isLostItemQuery ? newItem.userId : matchedItem.userId,
+                            foundItemHolder: isLostItemQuery ? matchedItem.userId : newItem.userId,
                             matchConfidence: match.score
                         };
                     });
-
+                
                 if (resultsToSave.length > 0) {
                     await Result.insertMany(resultsToSave, { ordered: false }).catch(err => {
-                        if (err.code !== 11000) {
-                            console.error("Error saving match results:", err);
-                        }
+                        if (err.code !== 11000) console.error("Error saving match results:", err);
                     });
                     console.log(`Saved ${resultsToSave.length} new match results.`);
                 }
             }
         }
-
+        
         res.status(201).json({ 
-            message: 'Found item reported successfully. We will notify owners of any matching lost items.', 
-            item: newFoundItem 
+            message: `${itemType.charAt(0).toUpperCase() + itemType.slice(1)} item reported successfully.`, 
+            item: newItem
         });
 
     } catch (err) {
-        console.error('Error reporting found item:', err);
-        res.status(500).json({ message: 'Internal Server Error while reporting found item.' });
+        console.error(`Error reporting ${req.body.itemType || 'item'}:`, err);
+        res.status(500).json({ message: 'Internal Server Error.' });
     }
 };
