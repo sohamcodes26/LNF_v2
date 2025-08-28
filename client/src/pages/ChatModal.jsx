@@ -4,7 +4,7 @@ import { Send, X, Loader } from 'lucide-react';
 import axios from 'axios';
 
 // Initialize socket connection
-const socket = io('https://lnf-render.onrender.com', {
+const socket = io('https://lnf-v2.onrender.com', {
     withCredentials: true
 });
 
@@ -32,7 +32,7 @@ const ChatModal = ({ currentUserId, chatPartner, onClose }) => {
                 // This API call now always returns a roomId on success (status 200 or 201).
                 // It no longer throws a 409 error.
                 const response = await axios.post(
-                    'https://lnf-render.onrender.com/apis/lost-and-found/chat/room',
+                    'https://lnf-v2.onrender.com/apis/lost-and-found/chat/room',
                     { otherUserId: chatPartner.id },
                     { withCredentials: true }
                 );
@@ -45,7 +45,7 @@ const ChatModal = ({ currentUserId, chatPartner, onClose }) => {
 
                 // Once the room is established, fetch the chat history
                 const historyResponse = await axios.get(
-                    `https://lnf-render.onrender.com/apis/lost-and-found/chat/history/${fetchedRoomId}`,
+                    `https://lnf-v2.onrender.com/apis/lost-and-found/chat/history/${fetchedRoomId}`,
                     { withCredentials: true }
                 );
                 setMessages(historyResponse.data);
@@ -105,7 +105,7 @@ const ChatModal = ({ currentUserId, chatPartner, onClose }) => {
                 // The message is sent via API to be saved in the DB
                 // The server will then emit it via socket to the room
                 await axios.post(
-                    'https://lnf-render.onrender.com/apis/lost-and-found/chat/message',
+                    'https://lnf-v2.onrender.com/apis/lost-and-found/chat/message',
                     { roomId, message: inputMessage.trim() },
                     { withCredentials: true }
                 );

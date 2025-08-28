@@ -156,7 +156,7 @@ const handleSuggestionClick = (value) => {
     };
 
     try {
-      const response = await axios.post('https://lnf-render.onrender.com/apis/lost-and-found/object-query/report-lost', formData, config);
+      const response = await axios.post('https://lnf-v2.onrender.com/apis/lost-and-found/object-query/report-lost', formData, config);
       setMessage(response.data.message || 'Lost item reported successfully!');
       setObjectName('');
       setObjectDescription('');

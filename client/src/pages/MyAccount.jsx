@@ -34,7 +34,7 @@ const MyAccount = () => {
 
       try {
         setLoading(true); 
-        const res = await axios.get('https://lnf-render.onrender.com/apis/lost-and-found/MyAccount/getprofile', config);
+        const res = await axios.get('https://lnf-v2.onrender.com/apis/lost-and-found/MyAccount/getprofile', config);
         setProfile(res.data);
         setError(''); 
       } catch (err) {
@@ -80,7 +80,7 @@ const MyAccount = () => {
 
     try {
       const res = await axios.post(
-        'https://lnf-render.onrender.com/apis/lost-and-found/MyAccount/change-password',
+        'https://lnf-v2.onrender.com/apis/lost-and-found/MyAccount/change-password',
         { oldPassword, newPassword },
         config
       );
