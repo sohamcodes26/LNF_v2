@@ -6,13 +6,15 @@ export const getMyMatches = async (req, res) => {
     const userId = req.id;
 
     try {
+        // --- SELECT a string of all the new fields to populate ---
+        const fieldsToPopulate = 'objectName brand material size markings colors images dateLost dateFound';
+
         const matches = await Result.find({
             $or: [{ lostItemOwner: userId }, { foundItemHolder: userId }]
         })
-        
-        .populate('lostQuery', 'objectName objectDescription objectImage dateLost')
-        
-        .populate('foundQuery', 'objectName objectDescription objectImage dateFound')
+        // --- UPDATED .populate() calls ---
+        .populate('lostQuery', fieldsToPopulate)
+        .populate('foundQuery', fieldsToPopulate)
         .populate('lostItemOwner', 'name email')
         .populate('foundItemHolder', 'name email')
         .sort({ createdAt: -1 });
@@ -24,6 +26,7 @@ export const getMyMatches = async (req, res) => {
     }
 };
 
+// --- No changes needed for the functions below as they don't populate item details ---
 
 export const rejectMatch = async (req, res) => {
     const { resultId } = req.params;
@@ -53,7 +56,6 @@ export const rejectMatch = async (req, res) => {
         res.status(500).json({ message: 'Server error while rejecting match.' });
     }
 };
-
 
 export const confirmMatch = async (req, res) => {
     const { resultId } = req.params;
@@ -98,7 +100,6 @@ export const confirmMatch = async (req, res) => {
     }
 };
 
-
 export const generateTransferCode = async (req, res) => {
     const { resultId } = req.params;
     const userId = req.id;
@@ -127,8 +128,6 @@ export const generateTransferCode = async (req, res) => {
     }
 };
 
-
-
 export const verifyTransferCode = async (req, res) => {
     const { resultId } = req.params;
     const userId = req.id;
@@ -152,11 +151,9 @@ export const verifyTransferCode = async (req, res) => {
         if (match.transferCode !== code) {
             return res.status(400).json({ message: 'Invalid or expired transfer code.' });
         }
-
         
         match.status = 'transfer_complete';
         match.transferCode = null;
-
  
         await Promise.all([
             LostItem.findByIdAndUpdate(match.lostQuery, { status: 'resolved' }),
@@ -164,7 +161,6 @@ export const verifyTransferCode = async (req, res) => {
             match.save()
         ]);
         
-
         res.status(200).json({ message: 'Transfer complete! The items are now marked as resolved.', match });
 
     } catch (error) {

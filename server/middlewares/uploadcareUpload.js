@@ -52,6 +52,5 @@ const uploadcareStorage = {
 
 const upload = multer({ storage: uploadcareStorage });
 
-// --- ⬇️ THIS IS THE CORRECTED LINE ⬇️ ---
-// We now handle an array of up to 8 files from the field named "images"
+// Correctly configured to handle an array of up to 8 files from the 'images' field
 export const uploadMultipleImages = upload.array('images', 8);

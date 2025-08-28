@@ -2,8 +2,9 @@ import { LostItem, FoundItem } from '../schema/objectqueryschema.js';
 
 export const getMyLostItems = async (req, res) => {
     try {
-        const userId = req.id;
-        const lostItems = await LostItem.find({ userId: userId });
+        const userId = req.id;
+        // No changes needed here as it just finds by userId
+        const lostItems = await LostItem.find({ userId: userId }).sort({ createdAt: -1 });
         res.status(200).json({ lostItems: lostItems });
 
     } catch (err) {
@@ -14,8 +15,9 @@ export const getMyLostItems = async (req, res) => {
 
 export const getMyFoundItems = async (req, res) => {
     try {
-        const userId = req.id;
-        const foundItems = await FoundItem.find({ userId: userId });
+        const userId = req.id;
+        // No changes needed here as it just finds by userId
+        const foundItems = await FoundItem.find({ userId: userId }).sort({ createdAt: -1 });
         res.status(200).json({ foundItems: foundItems });
         
     } catch (err) {

@@ -1,28 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import {
-  MessageSquare,
-  Calendar,
-  Search,
-  X,
-  ArrowLeft,
-  CheckCircle,
-  Loader,
-  ShoppingBag,
-  AlertTriangle,
-  ShieldCheck,
-  XCircle,
-  KeyRound, // Replaced QrCode with KeyRound
-  Info
-} from 'lucide-react';
-
+import { MessageSquare, Calendar, Search, X, ArrowLeft, CheckCircle, Loader, ShoppingBag, AlertTriangle, ShieldCheck, XCircle, KeyRound, Info } from 'lucide-react';
 import axios from 'axios';
 import ChatModal from './ChatModal';
 
+let CURRENT_USER_ID = ''; 
 
-// This should come from your user authentication context/store
-let CURRENT_USER_ID = 'your_logged_in_user_id'; // Replace with the actual logged-in user's ID
-
-// --- Reusable Modal Components ---
+// --- Reusable Modal Components (Fully Implemented) ---
 
 const AlertModal = ({ message, onClose, type = 'info' }) => {
   const icons = {
@@ -33,16 +16,9 @@ const AlertModal = ({ message, onClose, type = 'info' }) => {
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 w-full max-w-md text-center">
-        <div className="flex justify-center mb-4">
-          {icons[type]}
-        </div>
+        <div className="flex justify-center mb-4">{icons[type]}</div>
         <p className="text-lg text-gray-700 mb-6">{message}</p>
-        <button
-          onClick={onClose}
-          className="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors"
-        >
-          Close
-        </button>
+        <button onClick={onClose} className="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors">Close</button>
       </div>
     </div>
   );
@@ -50,7 +26,6 @@ const AlertModal = ({ message, onClose, type = 'info' }) => {
 
 const InputModal = ({ title, message, onConfirm, onCancel }) => {
   const [inputValue, setInputValue] = useState('');
-
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 w-full max-w-md">
@@ -73,7 +48,6 @@ const InputModal = ({ title, message, onConfirm, onCancel }) => {
   );
 };
 
-// --- New Modal to display the OTP Code ---
 const TransferCodeModal = ({ code, onClose, title }) => (
   <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 transition-opacity duration-300" onClick={onClose}>
     <div className="bg-white rounded-2xl p-8 text-center relative" onClick={(e) => e.stopPropagation()}>
@@ -97,40 +71,31 @@ const ResultsPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [chatPartner, setChatPartner] = useState(null);
   const [actionLoading, setActionLoading] = useState({});
-  const [transferCodeInfo, setTransferCodeInfo] = useState(null); // Replaced qrCodeData
+  const [transferCodeInfo, setTransferCodeInfo] = useState(null);
   const [alertInfo, setAlertInfo] = useState(null);
   const [verifyModalInfo, setVerifyModalInfo] = useState(null);
 
-  // --- Data Fetching ---
   const fetchMatches = async () => {
     try {
       setLoading(true);
-      // Using localhost as requested
-      const response = await axios.get('https://lnf-v2.onrender.com/apis/lost-and-found/results/', {
-        withCredentials: true,
-      });
-
+      const response = await axios.get('https://lnf-v2.onrender.com/apis/lost-and-found/results/', { withCredentials: true });
       CURRENT_USER_ID = response.data.userId;
       setMatches(response.data.matches || []);
-
     } catch (err) {
       setError('Failed to fetch matches. Please try again later.');
-      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchMatches();
-  }, []);
+  useEffect(() => { fetchMatches(); }, []);
 
-  // --- State Update Helpers ---
+  // --- State Update Helpers (Fully Implemented) ---
   const updateMatchInState = (updatedMatch) => {
     setMatches(currentMatches =>
       currentMatches.map(m =>
         m._id === updatedMatch._id
-          ? { ...m, status: updatedMatch.status } // Merge: keep old data, update status
+          ? { ...m, status: updatedMatch.status }
           : m
       )
     );
@@ -150,7 +115,7 @@ const ResultsPage = () => {
     );
   }
 
-  // --- API Action Handlers (Updated for OTP) ---  
+  // --- API Action Handlers (Fully Implemented) ---  
   const handleMatchAction = async (action, resultId, data = {}) => {
     setActionLoading(prev => ({ ...prev, [resultId]: true }));
     try {
@@ -165,13 +130,13 @@ const ResultsPage = () => {
           response = await axios.patch(`${API_BASE_URL}/${resultId}/reject`, {}, { withCredentials: true });
           updateMatchInState(response.data);
           break;
-        case 'generate-code': // Changed from generate-token
+        case 'generate-code':
           response = await axios.post(`${API_BASE_URL}/${resultId}/generate-code`, {}, { withCredentials: true });
           const match = matches.find(m => m._id === resultId);
           const itemTitle = match?.lostQuery?.objectName || match?.foundQuery?.objectName;
           setTransferCodeInfo({ code: response.data.transferCode, title: itemTitle });
           break;
-        case 'verify-code': // Changed from verify-token
+        case 'verify-code':
           response = await axios.post(`${API_BASE_URL}/${resultId}/verify-code`, { code: data.code }, { withCredentials: true });
           updateMatchInState(response.data.match);
           setAlertInfo({ message: 'Transfer completed successfully!', type: 'success' });
@@ -201,8 +166,7 @@ const ResultsPage = () => {
     });
   }
 
-
-  // --- UI Logic ---
+  // --- UI Logic (Fully Implemented) ---
   const openFullscreen = (imageUrl) => {
     setFullscreenImage(imageUrl);
     document.body.style.overflow = 'hidden';
@@ -232,7 +196,9 @@ const ResultsPage = () => {
     const itemToShow = match.lostItemOwner?._id === CURRENT_USER_ID ? match.foundQuery : match.lostQuery;
     return (
       itemToShow?.objectName?.toLowerCase().includes(query) ||
-      itemToShow?.objectDescription?.toLowerCase().includes(query)
+      itemToShow?.brand?.toLowerCase().includes(query) ||
+      itemToShow?.material?.toLowerCase().includes(query) ||
+      itemToShow?.markings?.toLowerCase().includes(query)
     );
   });
 
@@ -282,14 +248,15 @@ const ResultsPage = () => {
                     const dateType = isOwnerOfLostItem ? "Found on" : "Lost on";
                     const dateValue = isOwnerOfLostItem ? itemToShow?.dateFound : itemToShow?.dateLost;
                     const StatusIcon = getStatusInfo(match.status).icon;
+                    const displayImage = itemToShow?.images && itemToShow.images[0] ? itemToShow.images[0] : "https://placehold.co/400x300/E0E0E0/6C757D?text=No+Image";
 
                     return (
-                      <div key={match._id} className="group flex flex-col bg-white rounded-xl overflow-hidden shadow-lg border border-gray-200 transform transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl">
-                        <div className="w-full h-48 flex items-center justify-center bg-gray-100 cursor-pointer overflow-hidden" onClick={() => openFullscreen(itemToShow?.objectImage)}>
-                          <img src={itemToShow?.objectImage} alt={itemToShow?.objectName} className="w-full h-full object-cover transition-all duration-300 group-hover:scale-110" />
+                      <div key={match._id} className="group flex flex-col bg-white rounded-xl overflow-hidden shadow-lg border border-gray-200 hover:scale-[1.03] hover:shadow-2xl">
+                        <div className="w-full h-48 cursor-pointer overflow-hidden" onClick={() => openFullscreen(displayImage)}>
+                          <img src={displayImage} alt={itemToShow?.objectName} className="w-full h-full object-cover transition-all duration-300 group-hover:scale-110" />
                         </div>
                         <div className="p-5 flex flex-col flex-grow">
-                          <h3 className="text-lg font-bold text-gray-800 mb-2 leading-tight">{itemToShow?.objectName}</h3>
+                          <h3 className="text-lg font-bold text-gray-800 mb-2">{itemToShow?.objectName}</h3>
                           <div className="space-y-3 mb-5 text-sm text-gray-500">
                             <div className={`flex items-center gap-2 font-semibold ${getStatusInfo(match.status).color}`}>
                               <StatusIcon size={16} />
@@ -297,8 +264,10 @@ const ResultsPage = () => {
                             </div>
                             <div className="flex items-center gap-2">
                               <Calendar size={16} className="text-indigo-500" />
-                              <span>{dateType}: <strong className="text-gray-700">{new Date(dateValue).toLocaleDateString()}</strong></span>
+                              <span>{dateType}: <strong>{new Date(dateValue).toLocaleDateString()}</strong></span>
                             </div>
+                            {itemToShow?.brand && <p><strong>Brand:</strong> {itemToShow.brand}</p>}
+                            {itemToShow?.size && <p><strong>Size:</strong> {itemToShow.size}</p>}
                           </div>
 
                           <div className="mt-auto pt-4 border-t border-gray-200">
@@ -317,15 +286,12 @@ const ResultsPage = () => {
                                 <button onClick={() => handleVerify(match._id)} disabled={actionLoading[match._id]} className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 rounded-lg font-semibold text-white text-base transition-all duration-300 hover:bg-blue-700 active:scale-95 disabled:bg-gray-400">
                                   {actionLoading[match._id] ? <Loader size={18} className="animate-spin" /> : <ShieldCheck size={18} />} Complete Transfer
                                 </button>
-
                               ) : (
                                 <button onClick={() => handleMatchAction('generate-code', match._id)} disabled={actionLoading[match._id]} className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 rounded-lg font-semibold text-white text-base transition-all duration-300 hover:bg-indigo-700 active:scale-95 disabled:bg-gray-400">
                                   {actionLoading[match._id] ? <Loader size={18} className="animate-spin" /> : <KeyRound size={18} />} Show Transfer Code
                                 </button>
                               )
-                            )
-
-                            }
+                            )}
                             <button onClick={() => openChatModal(partner?._id, itemToShow?.objectName)} className="w-full mt-2 flex items-center justify-center gap-2 px-4 py-2 bg-gray-600 rounded-lg font-semibold text-white text-base transition-all duration-300 hover:bg-gray-700 active:scale-95">
                               <MessageSquare size={18} /> Chat with {partner?.name}
                             </button>

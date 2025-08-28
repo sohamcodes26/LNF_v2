@@ -1,11 +1,13 @@
 import express from 'express';
-import { reportItem } from '../controllers/objectquerycontroller.js';
-import { uploadMultipleImages } from '../middlewares/uploadcareUpload.js'; // Assuming you rename the middleware
+import { reportLostItem, reportFoundItem } from '../controllers/objectquerycontroller.js';
+import { uploadMultipleImages } from '../middlewares/uploadcareUpload.js';
 
 const object_query_router = express.Router();
 
-// A single endpoint for reporting both lost and found items
-// The middleware now accepts up to 8 files from the 'images' field
-object_query_router.post('/report-item', uploadMultipleImages, reportItem);
+// Route for lost items, using the multi-image upload middleware
+object_query_router.post('/report-lost', uploadMultipleImages, reportLostItem);
+
+// Route for found items, using the same multi-image upload middleware
+object_query_router.post('/report-found', uploadMultipleImages, reportFoundItem);
 
 export default object_query_router;
