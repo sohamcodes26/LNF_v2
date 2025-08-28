@@ -1,5 +1,7 @@
-import axios from 'axios';
-const FLASK_API_URL = "https://sohamnk-lost-and-found-ai-pipeline.hf.space";
+import axios from 'axios';
+
+
+const FLASK_API_URL = "https://sohamnk-lnf-v2-ai-pipeline.hf.space";
 
 
 export const processItemFeatures = async (itemData) => {
