@@ -291,7 +291,34 @@ const PostFoundPage = () => {
         </div>
       </div>
       <div className="hidden md:flex flex-col justify-center bg-gradient-to-br from-gray-50 via-blue-50 to-gray-100 p-12 lg:p-20">
-        {/* ... Tips section remains the same ... */}
+        <div className="max-w-md">
+            <div className="flex items-center gap-3">
+              <div className="bg-blue-100 p-3 rounded-full">
+                <Lightbulb className="w-6 h-6 text-blue-600" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-800">Tips for a Good Report</h2>
+            </div>
+            <p className="mt-4 text-gray-600">Help the owner identify their item by providing clear and accurate information.</p>
+            <ul className="mt-6 space-y-4">
+              <li className="flex gap-4">
+                <strong className="text-blue-600 font-bold">1.</strong>
+                <span className="text-gray-700"><strong>Take Clear Photos:</strong> Show the item from a few different angles, including any identifying marks.</span>
+              </li>
+              <li className="flex gap-4">
+                <strong className="text-blue-600 font-bold">2.</strong>
+                <span className="text-gray-700"><strong>Be Specific:</strong> Describe any unique features like brand names, scratches, or stickers. Avoid showing sensitive info.</span>
+              </li>
+              <li className="flex gap-4">
+                <strong className="text-blue-600 font-bold">3.</strong>
+                <span className="text-gray-700"><strong>Note the Location:</strong> Being precise about where you found the item helps confirm the true owner.</span>
+              </li>
+            </ul>
+            <div className="mt-8 grid grid-cols-3 gap-4">
+                <img src={walletImage} alt="Sample Wallet" className="rounded-xl object-cover h-24 w-full" />
+                <img src={calculatorImage} alt="Sample Calculator" className="rounded-xl object-cover h-24 w-full" />
+                <img src={bottleImage} alt="Sample Bottle" className="rounded-xl object-cover h-24 w-full" />
+            </div>
+          </div>
       </div>
     </main>
   );

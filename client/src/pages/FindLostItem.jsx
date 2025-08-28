@@ -274,7 +274,34 @@ const FindLostItemPage = () => {
         </div>
       </div>
       <div className="hidden md:flex flex-col justify-center bg-gradient-to-br from-gray-50 via-blue-50 to-gray-100 p-12 lg:p-20">
-        {/* ... Tips section remains the same ... */}
+        <div className="max-w-md">
+          <div className="flex items-center gap-3">
+            <div className="bg-blue-100 p-3 rounded-full">
+              <Lightbulb className="w-6 h-6 text-blue-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-800">Tips for a Quicker Find</h2>
+          </div>
+          <p className="mt-4 text-gray-600">The more details you provide, the better our chances of finding a match. Here’s what makes a difference:</p>
+          <ul className="mt-6 space-y-4">
+            <li className="flex gap-4">
+              <strong className="text-blue-600 font-bold">1.</strong>
+              <span className="text-gray-700"><strong>Clear Photos:</strong> Upload multiple photos from different angles. Good lighting is key!</span>
+            </li>
+            <li className="flex gap-4">
+              <strong className="text-blue-600 font-bold">2.</strong>
+              <span className="text-gray-700"><strong>Specific Details:</strong> Mention any scratches, stickers, or unique markings. These are the best identifiers.</span>
+            </li>
+            <li className="flex gap-4">
+              <strong className="text-blue-600 font-bold">3.</strong>
+              <span className="text-gray-700"><strong>Accurate Location:</strong> Be as precise as possible about where you last saw the item.</span>
+            </li>
+          </ul>
+          <div className="mt-8 grid grid-cols-3 gap-4">
+            <img src={walletImage} alt="Sample Wallet" className="rounded-xl object-cover h-24 w-full" />
+            <img src={calculatorImage} alt="Sample Calculator" className="rounded-xl object-cover h-24 w-full" />
+            <img src={bottleImage} alt="Sample Bottle" className="rounded-xl object-cover h-24 w-full" />
+          </div>
+        </div>
       </div>
     </main>
   );
