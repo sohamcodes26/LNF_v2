@@ -5,8 +5,7 @@ import ChatModal from './ChatModal';
 
 let CURRENT_USER_ID = ''; 
 
-// --- Reusable Modal Components (Fully Implemented) ---
-
+// --- Reusable Modal Components ---
 const AlertModal = ({ message, onClose, type = 'info' }) => {
   const icons = {
     info: <Info size={24} className="text-blue-500" />,
@@ -90,7 +89,6 @@ const ResultsPage = () => {
 
   useEffect(() => { fetchMatches(); }, []);
 
-  // --- State Update Helpers (Fully Implemented) ---
   const updateMatchInState = (updatedMatch) => {
     setMatches(currentMatches =>
       currentMatches.map(m =>
@@ -115,7 +113,6 @@ const ResultsPage = () => {
     );
   }
 
-  // --- API Action Handlers (Fully Implemented) ---  
   const handleMatchAction = async (action, resultId, data = {}) => {
     setActionLoading(prev => ({ ...prev, [resultId]: true }));
     try {
@@ -166,7 +163,6 @@ const ResultsPage = () => {
     });
   }
 
-  // --- UI Logic (Fully Implemented) ---
   const openFullscreen = (imageUrl) => {
     setFullscreenImage(imageUrl);
     document.body.style.overflow = 'hidden';
