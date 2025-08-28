@@ -19,26 +19,29 @@ export const reportLostItem = async (req, res) => {
             return res.status(500).json({ message: 'Could not process item features via AI service.' });
         }
 
+        // --- CORRECTED: Create new item with DINOv2 features ---
         let newLostItem = new LostItem({
             userId, objectName, brand, material, size, markings, colors,
             images: imageUrls,
             locationLost,
             dateLost: new Date(dateLost),
-            ...features
+            // Save the new features from the AI service
+            canonicalLabel: features.canonicalLabel,
+            brand_embedding: features.brand_embedding,
+            material_embedding: features.material_embedding,
+            size_embedding: features.size_embedding,
+            colors_embedding: features.colors_embedding,
+            image_embeddings: features.image_embeddings
         });
         
         await newLostItem.save();
-        console.log(`Saved new lost item with ID: ${newLostItem._id}`);
+        console.log(`[Node.js] Saved new lost item with ID: ${newLostItem._id}`);
 
-        const searchFilter = {
-            status: 'not_resolved',
-            canonicalLabel: newLostItem.canonicalLabel,
-            dateFound: { $gte: new Date(new Date(newLostItem.dateLost).setDate(newLostItem.dateLost.getDate() - 3)) }, 
-            locationFound: { $in: [newLostItem.locationLost, "Campus"] }
-        };
-
-        const itemsToSearch = await FoundItem.find(searchFilter).lean();
+        // Fetch all unresolved found items to be filtered by the AI
+        const itemsToSearch = await FoundItem.find({ status: 'not_resolved' }).lean();
         
+        console.log(`[Node.js] Found ${itemsToSearch.length} total candidates to send to AI.`);
+
         if (itemsToSearch.length > 0) {
             const matchResult = await findMatches(newLostItem.toObject(), itemsToSearch);
             if (matchResult && matchResult.matches.length > 0) {
@@ -88,25 +91,28 @@ export const reportFoundItem = async (req, res) => {
             return res.status(500).json({ message: 'Could not process item features via AI service.' });
         }
 
+        // --- CORRECTED: Create new item with DINOv2 features ---
         let newFoundItem = new FoundItem({
             userId, objectName, brand, material, size, markings, colors,
             images: imageUrls,
             locationFound,
             dateFound: new Date(dateFound),
-            ...features
+            // Save the new features from the AI service
+            canonicalLabel: features.canonicalLabel,
+            brand_embedding: features.brand_embedding,
+            material_embedding: features.material_embedding,
+            size_embedding: features.size_embedding,
+            colors_embedding: features.colors_embedding,
+            image_embeddings: features.image_embeddings
         });
 
         await newFoundItem.save();
-        console.log(`Saved new found item with ID: ${newFoundItem._id}`);
+        console.log(`[Node.js] Saved new found item with ID: ${newFoundItem._id}`);
 
-        const searchFilter = {
-            status: 'not_resolved',
-            canonicalLabel: newFoundItem.canonicalLabel,
-            dateLost: { $lte: new Date(new Date(newFoundItem.dateFound).setDate(newFoundItem.dateFound.getDate() + 3)) },
-            locationLost: { $in: [newFoundItem.locationFound, "Campus"] }
-        };
-        
-        const itemsToSearch = await LostItem.find(searchFilter).lean();
+        // Fetch all unresolved lost items to be filtered by the AI
+        const itemsToSearch = await LostItem.find({ status: 'not_resolved' }).lean();
+
+        console.log(`[Node.js] Found ${itemsToSearch.length} total candidates to send to AI.`);
         
         if (itemsToSearch.length > 0) {
             const matchResult = await findMatches(newFoundItem.toObject(), itemsToSearch);

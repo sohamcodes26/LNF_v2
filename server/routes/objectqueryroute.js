@@ -1,6 +1,7 @@
 import express from 'express';
 import { reportLostItem, reportFoundItem } from '../controllers/objectquerycontroller.js';
-import { uploadMultipleImages } from '../middlewares/uploadcareUpload.js';
+// We assume a middleware 'uploadMultipleImages' exists that handles array of files
+import { uploadMultipleImages } from '../middlewares/uploadcareUpload.js'; 
 
 const object_query_router = express.Router();
 
