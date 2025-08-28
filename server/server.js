@@ -29,8 +29,7 @@ const port = process.env.PORT || 9000;
 // --- CORS SETTINGS: CHANGE THIS BLOCK ---
 const allowedOrigins = [
     'http://localhost:5173', 
-    'https://lnf-render-ccad4qa3v-soham-koltes-projects-165258af.vercel.app',
-    'https://lostandfound-sooty.vercel.app'
+    'https://lnf-v2.vercel.app/'
 ];
 
 const io = new Server(server, {
