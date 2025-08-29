@@ -19,13 +19,11 @@ export const reportLostItem = async (req, res) => {
             return res.status(500).json({ message: 'Could not process item features via AI service.' });
         }
 
-        // --- CORRECTED: Create new item with DINOv2 features ---
         let newLostItem = new LostItem({
             userId, objectName, brand, material, size, markings, colors,
             images: imageUrls,
             locationLost,
             dateLost: new Date(dateLost),
-            // Save the new features from the AI service
             canonicalLabel: features.canonicalLabel,
             brand_embedding: features.brand_embedding,
             material_embedding: features.material_embedding,
@@ -37,18 +35,39 @@ export const reportLostItem = async (req, res) => {
         await newLostItem.save();
         console.log(`[Node.js] Saved new lost item with ID: ${newLostItem._id}`);
 
-        // Fetch all unresolved found items to be filtered by the AI
         const itemsToSearch = await FoundItem.find({ status: 'not_resolved' }).lean();
         
-        console.log(`[Node.js] Found ${itemsToSearch.length} total candidates to send to AI.`);
+        // --- START: NEW FILTERING LOGIC ---
+        const oneWeekInMillis = 7 * 24 * 60 * 60 * 1000;
+        const queryDate = newLostItem.dateLost;
+        const queryLocation = newLostItem.locationLost;
+        const queryLabel = newLostItem.canonicalLabel;
 
-        if (itemsToSearch.length > 0) {
-            const matchResult = await findMatches(newLostItem.toObject(), itemsToSearch);
+        const filteredItemsToSearch = itemsToSearch.filter(item => {
+            // 1. Filter by object name (canonicalLabel)
+            if (item.canonicalLabel !== queryLabel) return false;
+
+            // 2. Filter by date (within one week)
+            const itemDate = new Date(item.dateFound);
+            if (Math.abs(queryDate.getTime() - itemDate.getTime()) > oneWeekInMillis) return false;
+
+            // 3. Filter by location
+            const itemLocation = item.locationFound;
+            if (queryLocation !== 'Campus' && ![queryLocation, 'Campus'].includes(itemLocation)) return false;
+
+            return true;
+        });
+        console.log(`[Node.js] Pre-filtered candidates from ${itemsToSearch.length} to ${filteredItemsToSearch.length} before sending to AI.`);
+        // --- END: NEW FILTERING LOGIC ---
+
+        if (filteredItemsToSearch.length > 0) {
+            // Use the newly filtered list
+            const matchResult = await findMatches(newLostItem.toObject(), filteredItemsToSearch);
             if (matchResult && matchResult.matches.length > 0) {
                 const resultsToSave = matchResult.matches
-                    .filter(match => newLostItem.userId.toString() !== itemsToSearch.find(item => item._id.toString() === match._id).userId.toString())
+                    .filter(match => newLostItem.userId.toString() !== filteredItemsToSearch.find(item => item._id.toString() === match._id).userId.toString())
                     .map(match => {
-                        const foundItem = itemsToSearch.find(item => item._id.toString() === match._id);
+                        const foundItem = filteredItemsToSearch.find(item => item._id.toString() === match._id);
                         return {
                             lostQuery: newLostItem._id,
                             foundQuery: foundItem._id,
@@ -91,13 +110,11 @@ export const reportFoundItem = async (req, res) => {
             return res.status(500).json({ message: 'Could not process item features via AI service.' });
         }
 
-        // --- CORRECTED: Create new item with DINOv2 features ---
         let newFoundItem = new FoundItem({
             userId, objectName, brand, material, size, markings, colors,
             images: imageUrls,
             locationFound,
             dateFound: new Date(dateFound),
-            // Save the new features from the AI service
             canonicalLabel: features.canonicalLabel,
             brand_embedding: features.brand_embedding,
             material_embedding: features.material_embedding,
@@ -109,18 +126,39 @@ export const reportFoundItem = async (req, res) => {
         await newFoundItem.save();
         console.log(`[Node.js] Saved new found item with ID: ${newFoundItem._id}`);
 
-        // Fetch all unresolved lost items to be filtered by the AI
         const itemsToSearch = await LostItem.find({ status: 'not_resolved' }).lean();
 
-        console.log(`[Node.js] Found ${itemsToSearch.length} total candidates to send to AI.`);
+        // --- START: NEW FILTERING LOGIC ---
+        const oneWeekInMillis = 7 * 24 * 60 * 60 * 1000;
+        const queryDate = newFoundItem.dateFound;
+        const queryLocation = newFoundItem.locationFound;
+        const queryLabel = newFoundItem.canonicalLabel;
+
+        const filteredItemsToSearch = itemsToSearch.filter(item => {
+            // 1. Filter by object name (canonicalLabel)
+            if (item.canonicalLabel !== queryLabel) return false;
+
+            // 2. Filter by date (within one week)
+            const itemDate = new Date(item.dateLost);
+            if (Math.abs(queryDate.getTime() - itemDate.getTime()) > oneWeekInMillis) return false;
+
+            // 3. Filter by location
+            const itemLocation = item.locationLost;
+            if (queryLocation !== 'Campus' && ![queryLocation, 'Campus'].includes(itemLocation)) return false;
+
+            return true;
+        });
+        console.log(`[Node.js] Pre-filtered candidates from ${itemsToSearch.length} to ${filteredItemsToSearch.length} before sending to AI.`);
+        // --- END: NEW FILTERING LOGIC ---
         
-        if (itemsToSearch.length > 0) {
-            const matchResult = await findMatches(newFoundItem.toObject(), itemsToSearch);
+        if (filteredItemsToSearch.length > 0) {
+            // Use the newly filtered list
+            const matchResult = await findMatches(newFoundItem.toObject(), filteredItemsToSearch);
             if (matchResult && matchResult.matches.length > 0) {
                 const resultsToSave = matchResult.matches
-                    .filter(match => newFoundItem.userId.toString() !== itemsToSearch.find(item => item._id.toString() === match._id).userId.toString())
+                    .filter(match => newFoundItem.userId.toString() !== filteredItemsToSearch.find(item => item._id.toString() === match._id).userId.toString())
                     .map(match => {
-                        const lostItem = itemsToSearch.find(item => item._id.toString() === match._id);
+                        const lostItem = filteredItemsToSearch.find(item => item._id.toString() === match._id);
                         return {
                             lostQuery: lostItem._id,
                             foundQuery: newFoundItem._id,
