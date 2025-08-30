@@ -18,8 +18,7 @@ export const reportLostItem = async (req, res) => {
         if (!features) {
             return res.status(500).json({ message: 'Could not process item features via AI service.' });
         }
-
-        // --- UPDATED: Removed assignments for size_embedding and colors_embedding ---
+        
         let newLostItem = new LostItem({
             userId, objectName, brand, material, size, markings, colors,
             images: imageUrls,
@@ -28,6 +27,7 @@ export const reportLostItem = async (req, res) => {
             canonicalLabel: features.canonicalLabel,
             brand_embedding: features.brand_embedding,
             material_embedding: features.material_embedding,
+            markings_embedding: features.markings_embedding, // <-- ADD THIS LINE
             image_embeddings: features.image_embeddings
         });
         
@@ -100,7 +100,6 @@ export const reportFoundItem = async (req, res) => {
             return res.status(500).json({ message: 'Could not process item features via AI service.' });
         }
 
-        // --- UPDATED: Removed assignments for size_embedding and colors_embedding ---
         let newFoundItem = new FoundItem({
             userId, objectName, brand, material, size, markings, colors,
             images: imageUrls,
@@ -109,6 +108,7 @@ export const reportFoundItem = async (req, res) => {
             canonicalLabel: features.canonicalLabel,
             brand_embedding: features.brand_embedding,
             material_embedding: features.material_embedding,
+            markings_embedding: features.markings_embedding, // <-- ADD THIS LINE
             image_embeddings: features.image_embeddings
         });
 
