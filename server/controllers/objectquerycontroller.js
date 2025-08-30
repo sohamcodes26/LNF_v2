@@ -11,23 +11,31 @@ export const reportLostItem = async (req, res) => {
             return res.status(400).json({ message: 'Missing required fields for lost item.' });
         }
 
+        // --- FIX: Ensure 'colors' is always an array ---
+        let colorsArray = colors;
+        if (!colorsArray) {
+            colorsArray = []; // If colors is undefined or null, make it an empty array
+        } else if (!Array.isArray(colorsArray)) {
+            colorsArray = [colorsArray]; // If colors is a single string, wrap it in an array
+        }
+
         const imageUrls = req.files ? req.files.map(file => file.path) : [];
 
-        const featuresPayload = { objectName, brand, material, size, markings, colors, images: imageUrls };
+        const featuresPayload = { objectName, brand, material, size, markings, colors: colorsArray, images: imageUrls };
         const features = await processItemFeatures(featuresPayload);
         if (!features) {
             return res.status(500).json({ message: 'Could not process item features via AI service.' });
         }
         
         let newLostItem = new LostItem({
-            userId, objectName, brand, material, size, markings, colors,
+            userId, objectName, brand, material, size, markings, colors: colorsArray,
             images: imageUrls,
             locationLost,
             dateLost: new Date(dateLost),
             canonicalLabel: features.canonicalLabel,
             brand_embedding: features.brand_embedding,
             material_embedding: features.material_embedding,
-            markings_embedding: features.markings_embedding, // <-- ADD THIS LINE
+            markings_embedding: features.markings_embedding,
             image_embeddings: features.image_embeddings
         });
         
@@ -92,23 +100,31 @@ export const reportFoundItem = async (req, res) => {
             return res.status(400).json({ message: 'A minimum of 3 images are required for found items.' });
         }
 
+        // --- FIX: Ensure 'colors' is always an array ---
+        let colorsArray = colors;
+        if (!colorsArray) {
+            colorsArray = []; // If colors is undefined or null, make it an empty array
+        } else if (!Array.isArray(colorsArray)) {
+            colorsArray = [colorsArray]; // If colors is a single string, wrap it in an array
+        }
+
         const imageUrls = req.files.map(file => file.path);
 
-        const featuresPayload = { objectName, brand, material, size, markings, colors, images: imageUrls };
+        const featuresPayload = { objectName, brand, material, size, markings, colors: colorsArray, images: imageUrls };
         const features = await processItemFeatures(featuresPayload);
         if (!features) {
             return res.status(500).json({ message: 'Could not process item features via AI service.' });
         }
 
         let newFoundItem = new FoundItem({
-            userId, objectName, brand, material, size, markings, colors,
+            userId, objectName, brand, material, size, markings, colors: colorsArray,
             images: imageUrls,
             locationFound,
             dateFound: new Date(dateFound),
             canonicalLabel: features.canonicalLabel,
             brand_embedding: features.brand_embedding,
             material_embedding: features.material_embedding,
-            markings_embedding: features.markings_embedding, // <-- ADD THIS LINE
+            markings_embedding: features.markings_embedding,
             image_embeddings: features.image_embeddings
         });
 
