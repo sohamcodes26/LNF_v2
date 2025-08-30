@@ -154,6 +154,11 @@ const PostFoundPage = () => {
   const handleFormSubmit = async (event) => {
     event.preventDefault();
     setErrorMessage('');
+
+    if (colors.length === 0) {
+      setErrorMessage('Please select at least one color.');
+      return;
+    }
     if (images.length < 3) {
       setErrorMessage('Please upload at least 3 images.');
       return;
@@ -237,7 +242,7 @@ const PostFoundPage = () => {
                 <input id="image-upload" type="file" accept="image/*" multiple className="hidden" onChange={handleImageChange} />
               </div>
 
-              <div><Label htmlFor="brand">Brand</Label><input id="brand" type="text" placeholder="e.g., Apple or type 'Don't Know'" value={brand} onChange={(e) => setBrand(e.target.value)} required className="w-full px-4 py-2 mt-2 text-gray-800 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" /></div>
+              <div><Label htmlFor="brand">Brand (Optional)</Label><input id="brand" type="text" placeholder="e.g., Apple or type 'Don't Know'" value={brand} onChange={(e) => setBrand(e.target.value)} className="w-full px-4 py-2 mt-2 text-gray-800 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" /></div>
               
               <div>
                 <Label htmlFor="material">Material</Label>
@@ -255,7 +260,7 @@ const PostFoundPage = () => {
                 </select>
               </div>
               
-              <div><Label htmlFor="markings">Unique Markings</Label><textarea id="markings" rows={2} placeholder="e.g., 'S' sticker on back, scratch on corner" value={markings} onChange={(e) => setMarkings(e.target.value)} className="w-full px-4 py-2 mt-2 text-gray-800 border border-gray-300 rounded-lg" /></div>
+              <div><Label htmlFor="markings">Unique Markings (Optional)</Label><textarea id="markings" rows={2} placeholder="e.g., 'S' sticker on back, scratch on corner" value={markings} onChange={(e) => setMarkings(e.target.value)} className="w-full px-4 py-2 mt-2 text-gray-800 border border-gray-300 rounded-lg" /></div>
               
               <div>
                 <Label>Colors</Label>

@@ -7,13 +7,12 @@ const aiFeatureFields = {
         trim: true,
         index: true 
     },
-    // New text embeddings
+    // Text embeddings for brand and material
     brand_embedding: { type: [Number] },
     material_embedding: { type: [Number] },
-    size_embedding: { type: [Number] },
-    colors_embedding: { type: [Number] },
+    // 'size_embedding' and 'colors_embedding' have been removed.
     
-    // New field for DINOv2 image embeddings
+    // Field for DINOv2 image embeddings
     image_embeddings: {
         type: [[Number]] // An array of arrays (embeddings)
     }

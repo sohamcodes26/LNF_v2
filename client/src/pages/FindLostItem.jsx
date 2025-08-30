@@ -140,6 +140,12 @@ const FindLostItemPage = () => {
   const handleFormSubmit = async (event) => {
     event.preventDefault();
     setMessage('');
+
+    if (colors.length === 0) {
+      setMessage('Please select at least one color.');
+      return;
+    }
+
     setLoading(true);
     setProgressText('Uploading images...');
 
@@ -221,7 +227,7 @@ const FindLostItemPage = () => {
                 <input id="image-upload" type="file" accept="image/*" multiple className="hidden" onChange={handleImageChange} />
               </div>
 
-              <div><Label htmlFor="brand">Brand</Label><input id="brand" type="text" placeholder="e.g., Apple or type 'Don't Know'" value={brand} onChange={(e) => setBrand(e.target.value)} required className="w-full px-4 py-2 mt-2 text-gray-800 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" /></div>
+              <div><Label htmlFor="brand">Brand (Optional)</Label><input id="brand" type="text" placeholder="e.g., Apple or type 'Don't Know'" value={brand} onChange={(e) => setBrand(e.target.value)} className="w-full px-4 py-2 mt-2 text-gray-800 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" /></div>
               
               <div>
                 <Label htmlFor="material">Material</Label>
@@ -239,7 +245,7 @@ const FindLostItemPage = () => {
                 </select>
               </div>
               
-              <div><Label htmlFor="markings">Unique Markings</Label><textarea id="markings" rows={2} placeholder="e.g., 'S' sticker on back, scratch on corner" value={markings} onChange={(e) => setMarkings(e.target.value)} className="w-full px-4 py-2 mt-2 text-gray-800 border border-gray-300 rounded-lg" /></div>
+              <div><Label htmlFor="markings">Unique Markings (Optional)</Label><textarea id="markings" rows={2} placeholder="e.g., 'S' sticker on back, scratch on corner" value={markings} onChange={(e) => setMarkings(e.target.value)} className="w-full px-4 py-2 mt-2 text-gray-800 border border-gray-300 rounded-lg" /></div>
               
               <div>
                 <Label>Colors</Label>
@@ -257,7 +263,7 @@ const FindLostItemPage = () => {
               </div>
               <div><Label htmlFor="date-lost">Date Lost</Label><input id="date-lost" type="date" value={dateLost} onChange={(e) => setDateLost(e.target.value)} className="w-full px-4 py-2 mt-2 text-gray-800 border border-gray-300 rounded-lg" required /></div>
 
-              {message && <p className={`text-center text-sm ${message.includes('successfully') ? 'text-green-600' : 'text-red-600'}`}>{message}</p>}
+              {message && <p className={`text-center text-sm ${message.includes('successfully') || message.includes('submitted') ? 'text-green-600' : 'text-red-600'}`}>{message}</p>}
 
               <Button type="submit" variant="primary" disabled={loading}>
                 {loading ? <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Reporting...</> : <><Search className="w-5 h-5" /> Report & Search</>}
