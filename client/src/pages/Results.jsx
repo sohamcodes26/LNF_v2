@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MessageSquare, Calendar, Search, X, ArrowLeft, CheckCircle, Loader, ShoppingBag, AlertTriangle, ShieldCheck, XCircle, KeyRound, Info } from 'lucide-react';
+import { MessageSquare, Calendar, Search, X, ArrowLeft, CheckCircle, Loader, ShoppingBag, AlertTriangle, ShieldCheck, XCircle, KeyRound, Info, ChevronLeft, ChevronRight } from 'lucide-react';
 import axios from 'axios';
 import ChatModal from './ChatModal';
 
@@ -62,11 +62,59 @@ const TransferCodeModal = ({ code, onClose, title }) => (
 );
 
 
+// --- NEW: Reusable Carousel for both cards and fullscreen view ---
+const ImageCarousel = ({ images, altText, onImageClick, isFullscreen = false }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const goToPrevious = (e) => {
+    e.stopPropagation();
+    const isFirstSlide = currentIndex === 0;
+    const newIndex = isFirstSlide ? images.length - 1 : currentIndex - 1;
+    setCurrentIndex(newIndex);
+  };
+
+  const goToNext = (e) => {
+    e.stopPropagation();
+    const isLastSlide = currentIndex === images.length - 1;
+    const newIndex = isLastSlide ? 0 : currentIndex + 1;
+    setCurrentIndex(newIndex);
+  };
+
+  const handleImageClick = () => {
+    if (onImageClick) {
+      onImageClick(images, currentIndex);
+    }
+  };
+
+  const imageSrc = images && images.length > 0 ? images[currentIndex] : "https://placehold.co/400x300/E0E0E0/6C757D?text=No+Image";
+
+  return (
+    <div className={`w-full relative group bg-gray-200 ${isFullscreen ? 'h-full w-full flex items-center justify-center' : 'h-48'}`} onClick={handleImageClick}>
+      <img
+        src={imageSrc}
+        alt={`${altText} ${currentIndex + 1}`}
+        className={isFullscreen ? "max-w-full max-h-full object-contain rounded-lg" : "w-full h-full object-cover transition-all duration-300 group-hover:scale-110 cursor-pointer"}
+      />
+      {images && images.length > 1 && (
+        <>
+          <button onClick={goToPrevious} className={`absolute top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full p-2 transition-opacity ${isFullscreen ? 'left-4 opacity-100' : 'left-2 opacity-0 group-hover:opacity-100'}`}>
+            <ChevronLeft size={24} />
+          </button>
+          <button onClick={goToNext} className={`absolute top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full p-2 transition-opacity ${isFullscreen ? 'right-4 opacity-100' : 'right-2 opacity-0 group-hover:opacity-100'}`}>
+            <ChevronRight size={24} />
+          </button>
+        </>
+      )}
+    </div>
+  );
+};
+
+
 const ResultsPage = () => {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [fullscreenImage, setFullscreenImage] = useState(null);
+  const [fullscreenData, setFullscreenData] = useState(null); // UPDATED: for fullscreen carousel
   const [searchQuery, setSearchQuery] = useState('');
   const [chatPartner, setChatPartner] = useState(null);
   const [actionLoading, setActionLoading] = useState({});
@@ -163,13 +211,13 @@ const ResultsPage = () => {
     });
   }
 
-  const openFullscreen = (imageUrl) => {
-    setFullscreenImage(imageUrl);
+  const openFullscreen = (images, startIndex = 0) => {
+    setFullscreenData({ images, startIndex });
     document.body.style.overflow = 'hidden';
   };
 
   const closeFullscreen = () => {
-    setFullscreenImage(null);
+    setFullscreenData(null);
     document.body.style.overflow = 'auto';
   };
 
@@ -244,13 +292,10 @@ const ResultsPage = () => {
                     const dateType = isOwnerOfLostItem ? "Found on" : "Lost on";
                     const dateValue = isOwnerOfLostItem ? itemToShow?.dateFound : itemToShow?.dateLost;
                     const StatusIcon = getStatusInfo(match.status).icon;
-                    const displayImage = itemToShow?.images && itemToShow.images[0] ? itemToShow.images[0] : "https://placehold.co/400x300/E0E0E0/6C757D?text=No+Image";
-
+                    
                     return (
-                      <div key={match._id} className="group flex flex-col bg-white rounded-xl overflow-hidden shadow-lg border border-gray-200 hover:scale-[1.03] hover:shadow-2xl">
-                        <div className="w-full h-48 cursor-pointer overflow-hidden" onClick={() => openFullscreen(displayImage)}>
-                          <img src={displayImage} alt={itemToShow?.objectName} className="w-full h-full object-cover transition-all duration-300 group-hover:scale-110" />
-                        </div>
+                      <div key={match._id} className="group flex flex-col bg-white rounded-xl overflow-hidden shadow-lg border border-gray-200 hover:scale-[1.03] hover:shadow-2xl transition-transform duration-300">
+                        <ImageCarousel images={itemToShow?.images} altText={itemToShow?.objectName} onImageClick={() => openFullscreen(itemToShow?.images)} />
                         <div className="p-5 flex flex-col flex-grow">
                           <h3 className="text-lg font-bold text-gray-800 mb-2">{itemToShow?.objectName}</h3>
                           <div className="space-y-3 mb-5 text-sm text-gray-500">
@@ -309,9 +354,11 @@ const ResultsPage = () => {
         </div>
       </main>
 
-      {fullscreenImage && (
+      {fullscreenData && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 transition-opacity duration-300" onClick={closeFullscreen}>
-          <img src={fullscreenImage} alt="Full screen view" className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg" onClick={(e) => e.stopPropagation()} />
+          <div className="relative w-full h-full max-w-[90vw] max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+            <ImageCarousel images={fullscreenData.images} altText="Fullscreen view" isFullscreen={true} />
+          </div>
           <button className="absolute top-4 right-4 text-white bg-black/50 rounded-full p-2" onClick={closeFullscreen}><X size={24} /></button>
         </div>
       )}

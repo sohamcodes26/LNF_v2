@@ -1,12 +1,65 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FaArrowLeft, FaBoxOpen, FaMapMarkerAlt, FaCalendarAlt } from "react-icons/fa"; 
-import { CheckCircle, Tag, Droplet, Ruler, Fingerprint } from "lucide-react";
+import { CheckCircle, Tag, Droplet, Ruler, Fingerprint, ChevronLeft, ChevronRight, X } from "lucide-react";
+
+// --- Reusable Image Carousel Component (Upgraded to support fullscreen) ---
+const ImageCarousel = ({ images, altText, onImageClick, isFullscreen = false, startIndex = 0 }) => {
+  const [currentIndex, setCurrentIndex] = useState(startIndex);
+
+  useEffect(() => {
+    setCurrentIndex(startIndex); // Sync index when props change
+  }, [startIndex]);
+
+  const goToPrevious = (e) => {
+    e.stopPropagation();
+    const isFirstSlide = currentIndex === 0;
+    const newIndex = isFirstSlide ? images.length - 1 : currentIndex - 1;
+    setCurrentIndex(newIndex);
+  };
+
+  const goToNext = (e) => {
+    e.stopPropagation();
+    const isLastSlide = currentIndex === images.length - 1;
+    const newIndex = isLastSlide ? 0 : currentIndex + 1;
+    setCurrentIndex(newIndex);
+  };
+
+  const handleImageClick = () => {
+    if (onImageClick) {
+      onImageClick(images, currentIndex);
+    }
+  };
+
+  const imageSrc = images && images.length > 0 ? images[currentIndex] : "https://placehold.co/400x300/E0E0E0/6C757D?text=No+Image";
+
+  return (
+    <div className={`w-full relative group bg-gray-200 ${isFullscreen ? 'h-full w-full flex items-center justify-center' : 'h-48'}`} onClick={handleImageClick}>
+      <img
+        src={imageSrc}
+        alt={`${altText} ${currentIndex + 1}`}
+        className={isFullscreen ? "max-w-full max-h-full object-contain rounded-lg" : "w-full h-full object-cover transition-all duration-300 group-hover:scale-110 cursor-pointer"}
+      />
+      {images && images.length > 1 && (
+        <>
+          <button onClick={goToPrevious} className={`absolute top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full p-2 transition-opacity ${isFullscreen ? 'left-4 opacity-100' : 'left-2 opacity-0 group-hover:opacity-100'}`}>
+            <ChevronLeft size={24} />
+          </button>
+          <button onClick={goToNext} className={`absolute top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full p-2 transition-opacity ${isFullscreen ? 'right-4 opacity-100' : 'right-2 opacity-0 group-hover:opacity-100'}`}>
+            <ChevronRight size={24} />
+          </button>
+        </>
+      )}
+    </div>
+  );
+};
+
 
 const FoundItems = () => {
   const [foundItems, setFoundItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [fullscreenData, setFullscreenData] = useState(null); // State for fullscreen view
 
   useEffect(() => {
     const fetchFoundItems = async () => {
@@ -21,6 +74,17 @@ const FoundItems = () => {
     };
     fetchFoundItems();
   }, []);
+
+  // Functions to handle fullscreen modal
+  const openFullscreen = (images, startIndex = 0) => {
+    setFullscreenData({ images, startIndex });
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeFullscreen = () => {
+    setFullscreenData(null);
+    document.body.style.overflow = 'auto';
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 p-4 sm:p-6">
@@ -38,11 +102,7 @@ const FoundItems = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {foundItems.map((item) => (
                   <div key={item._id} className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 flex flex-col">
-                    <img
-                      src={item.images && item.images[0] ? item.images[0] : "https://placehold.co/400x300/E0E0E0/6C757D?text=No+Image"}
-                      alt={item.objectName || "Found Item"}
-                      className="w-full h-48 object-cover"
-                    />
+                    <ImageCarousel images={item.images} altText={item.objectName} onImageClick={openFullscreen} />
                     <div className="p-4 space-y-3 flex-grow flex flex-col">
                       <h3 className="text-xl font-bold text-gray-800 truncate">{item.objectName || "Unnamed Item"}</h3>
                       <div className="text-gray-700 text-sm space-y-2 flex-grow">
@@ -69,6 +129,15 @@ const FoundItems = () => {
           )}
         </div>
       </div>
+      
+      {fullscreenData && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 transition-opacity duration-300" onClick={closeFullscreen}>
+          <div className="relative w-full h-full max-w-[90vw] max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
+            <ImageCarousel images={fullscreenData.images} startIndex={fullscreenData.startIndex} altText="Fullscreen view" isFullscreen={true} />
+          </div>
+          <button className="absolute top-4 right-4 text-white bg-black/50 rounded-full p-2" onClick={closeFullscreen}><X size={24} /></button>
+        </div>
+      )}
     </div>
   );
 };
