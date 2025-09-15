@@ -36,6 +36,7 @@ const StatCard = ({ icon, title, value, color, trend, trendValue }) => (
 );
 
 // --- Enhanced HighlightCard Component ---
+// --- Enhanced HighlightCard Component (Corrected) ---
 const HighlightCard = ({ icon, title, value, color, subtitle }) => (
     <div 
         className="relative text-white p-6 sm:p-8 lg:p-10 rounded-2xl shadow-xl flex flex-col items-center justify-center text-center overflow-hidden group hover:scale-[1.02] transition-transform duration-300"
@@ -44,10 +45,9 @@ const HighlightCard = ({ icon, title, value, color, subtitle }) => (
         }}
     >
         <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
-        <div className="absolute top-4 right-4 opacity-20">
-            {React.cloneElement(icon, { size: 60 })}
-        </div>
-        <div className="relative z-10">
+        
+        {/* The main content wrapper is now a flex column to ensure perfect centering */}
+        <div className="relative z-10 flex flex-col items-center">
             {React.cloneElement(icon, { size: window.innerWidth < 640 ? 32 : 48, className: "mb-3 sm:mb-4 opacity-90" })}
             <p className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight mb-1 sm:mb-2">{value}</p>
             <p className="text-base sm:text-lg font-medium opacity-90">{title}</p>
