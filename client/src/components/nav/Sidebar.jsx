@@ -71,7 +71,7 @@ const Sidebar = ({ isOpen, onClose, side = 'left' }) => {
               <HelpCircle size={20} />
               <span>Help</span>
             </NavLink>
-            <button onClick={handleLogout} className={`${linkClass} mt-70 text-red-600 hover:bg-red-100`}>
+            <button onClick={handleLogout} className={`${linkClass} mt-60 text-red-600 hover:bg-red-100`}>
               <LogOut size={20} />
               <span>Logout</span>
             </button>
