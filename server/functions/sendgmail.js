@@ -13,17 +13,25 @@ const otp_generator = () => {
 }
 
 
-export const sendmail = async(rec_mail) => {
+// export const sendmail = async(rec_mail) => {
     
-    const transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 587,
-        secure: false, 
-        auth: {
-            user: process.env.otp_mail,
-            pass: process.env.otp_pass, 
-        }
-    });
+//     const transporter = nodemailer.createTransport({
+//         host: 'smtp.gmail.com',
+//         port: 587,
+//         secure: false, 
+//         auth: {
+//             user: process.env.otp_mail,
+//             pass: process.env.otp_pass, 
+//         }
+//     });
+
+// in sendgmail.js
+export const sendmail = async (rec_mail) => {
+    const otp = "123456"; // hardcoded test
+    console.log(`Fake OTP generated: ${otp}`);
+    return otp;
+}
+
 
   
     const otp = otp_generator();
