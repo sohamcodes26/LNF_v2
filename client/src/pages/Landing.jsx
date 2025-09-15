@@ -31,12 +31,14 @@ const LandingPage = () => {
   };
 
   const isModalOpen = authState === 'pending-verification' || modalView !== null;
-  const closeModal = () => setModalView(null);
+  const closeModal = () => setModalView(null);
+
   const handleProtectedButtonClick = (e, targetPath) => {
     if (!isAuthenticated) {
       e.preventDefault(); 
       setModalView('login'); 
-    } else {
+    } else {
+
     }
   };
 
@@ -62,7 +64,7 @@ const LandingPage = () => {
         <div className="absolute inset-0 bg-black/50 z-0"></div>
         <nav className="relative z-10 w-full p-6 flex justify-between items-center">
           <Link to="/" className="text-2xl font-bold tracking-tight">
-            Lost&Found
+            Findit
           </Link>
           <div className="flex items-center gap-4">
             {isAuthenticated ? (
