@@ -1,5 +1,5 @@
 import express from 'express';
-import { getDashboardStatistics } from '../controllers/statisticscontroller';
+import { getDashboardStatistics } from '../controllers/statisticscontroller.js';
 // import { getDashboardStatistics } from '../controllers/statisticscontroller.js';
 
 
