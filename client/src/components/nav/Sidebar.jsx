@@ -1,7 +1,8 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { User, Archive, CheckSquare, HelpCircle, LogOut, X, Sparkles } from 'lucide-react';
+import { User, Archive, CheckSquare, HelpCircle, LogOut, X, Sparkles } from 'lucide-react';
+
 const Sidebar = ({ isOpen, onClose, side = 'left' }) => {
   const { logout, userEmail } = useAuth();
   const navigate = useNavigate();
@@ -13,7 +14,8 @@ const Sidebar = ({ isOpen, onClose, side = 'left' }) => {
   };
 
   const linkClass = "flex items-center gap-4 px-4 py-3 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors";
-  const activeLinkClass = "bg-blue-100 text-blue-600 font-semibold";
+  const activeLinkClass = "bg-blue-100 text-blue-600 font-semibold";
+
   const sidebarPositionClass = side === 'right' ? 'right-0' : 'left-0';
   const sidebarTransformClass = isOpen
     ? 'translate-x-0' 
@@ -59,6 +61,12 @@ const Sidebar = ({ isOpen, onClose, side = 'left' }) => {
               <Sparkles size={20} /> 
               <span>Results</span>
             </NavLink>
+
+            <NavLink to="/statistics" className={({isActive}) => `${linkClass} ${isActive ? activeLinkClass : ''}`} onClick={onClose}>
+              <Sparkles size={20} /> 
+              <span>Statistics</span>
+            </NavLink>
+            
             <NavLink to="/help" className={({isActive}) => `${linkClass} ${isActive ? activeLinkClass : ''}`} onClick={onClose}>
               <HelpCircle size={20} />
               <span>Help</span>

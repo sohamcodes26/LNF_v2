@@ -15,6 +15,7 @@ import profile_router from "./routes/profileroute.js";
 import my_items_router from "./routes/myitemsroute.js";
 import chat_router from "./routes/chatroute.js";
 import result_router from "./routes/resultroute.js";
+import statistics_router from "./routes/statisticsroute.js";
 
 import { connectdb } from "./config/database.js";
 import { validate_token } from "./middlewares/validate_token.js"; 
@@ -64,6 +65,8 @@ app.use('/apis/lost-and-found/my-items', validate_token, my_items_router);
 app.use('/apis/lost-and-found/MyAccount', validate_token, profile_router);
 app.use('/apis/lost-and-found/chat', validate_token, chat_router);
 app.use('/apis/lost-and-found/results', validate_token, result_router);
+app.use('/apis/lost-and-found/statistics', statistics_router);
+
 
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
